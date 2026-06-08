@@ -1,0 +1,300 @@
+{
+  "info": {
+    "_postman_id": "6b6094a6-5694-4a5f-81dd-4cbef176f14a",
+    "name": "bnbMovilesII",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55463717",
+    "_collection_link": "https://go.postman.co/collection/55463717-6b6094a6-5694-4a5f-81dd-4cbef176f14a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "local",
+      "item": [
+        {
+          "name": "get Lugar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{toncibnb}}/api/lugares/1",
+              "host": [
+                "{{toncibnb}}"
+              ],
+              "path": [
+                "api",
+                "lugares",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get User Copy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{toncibnb}}/api/reservas/cliente/1",
+              "host": [
+                "{{toncibnb}}"
+              ],
+              "path": [
+                "api",
+                "reservas",
+                "cliente",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LoginUser",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\":\"tpinto@nur.edu\",\r\n    \"password\":\"password\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/users/login",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LoginArrendatario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nombrecompleto\": \"Tonci Pinto Cuellar\",\r\n    \"email\":\"56350a@nur.edu.bo\",\r\n    \"password\":\"nur123\",\r\n    \"telefono\":\"75377329\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/arrendatario",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "arrendatario"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "guardar lugar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": 1,\r\n        \"nombre\": \"Departamento de 2 pisos cerca de la plaza\",\r\n        \"descripcion\": \"Bonito departamento cerca de la plaza 24 de septiembre, super céntrico y de fácil acceso a áreas turísticas\",\r\n        \"cantPersonas\": 4,\r\n        \"cantCamas\": 4,\r\n        \"cantBanios\": 2,\r\n        \"cantHabitaciones\": 3,\r\n        \"tieneWifi\": 1,\r\n        \"cantVehiculosParqueo\": 1,\r\n        \"precioNoche\": \"30.00\",\r\n        \"costoLimpieza\": \"5.00\",\r\n        \"ciudad\": \"Santa Cruz\",\r\n        \"latitud\": \"-17.7828703\",\r\n        \"longitud\": \"-63.180618\",\r\n        \"arrendatario_id\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/lugar",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "lugar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "guardar reserva",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"lugar_id\": 1,\r\n    \"cliente_id\": 1,\r\n    \"fechaInicio\": \"2020-01-01\",\r\n    \"fechaFin\": \"2020-01-10\",\r\n    \"precioTotal\": \"50.00\",\r\n    \"precioLimpieza\": \"10.00\",\r\n    \"precioNoches\": \"10.00\",\r\n    \"precioServicio\": \"2.00\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{toncibnb}}/api/reservas",
+              "host": [
+                "{{toncibnb}}"
+              ],
+              "path": [
+                "api",
+                "reservas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "guardar lugar Copy",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": "/C:/Users/Tonci/Downloads/image.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/lugar/1/foto",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "lugar",
+                "1",
+                "foto"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Avance",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"ciudad\":\"Bolivia\",\r\n    \"descripcion\":\"opcional\",\r\n    \"cantPersonas\":\"opcional\",\r\n    \"cantCamas\":0,\r\n    \"cantBanios\":0,\r\n    \"cantHabitaciones\":0,\r\n    \"tieneWifi\":0,\r\n    \"cantVehiculosParqueo\":0,\r\n    \"precioNoche\":0.0\r\n\r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{toncibnb}}/api/lugares/advancedsearch",
+              "host": [
+                "{{toncibnb}}"
+              ],
+              "path": [
+                "api",
+                "lugares",
+                "advancedsearch"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"search\":\"S\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{toncibnb}}/api/lugares/search",
+              "host": [
+                "{{toncibnb}}"
+              ],
+              "path": [
+                "api",
+                "lugares",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "toncibnb",
+      "value": ""
+    }
+  ]
+}
