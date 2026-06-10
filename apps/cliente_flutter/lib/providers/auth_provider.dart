@@ -1,3 +1,4 @@
+import '../models/registration_result.dart';
 import 'package:flutter/material.dart';
 
 import '../models/user_session.dart';
@@ -15,20 +16,29 @@ class AuthProvider extends ChangeNotifier {
   UserSession? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
+  String? _successMessage;
 
   UserSession? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
-  bool get isAuthenticated => _currentUser != null;
+  bool get isAuthenticated => _currentUser?.hasToken ?? false;
   String? get errorMessage => _errorMessage;
+  String? get successMessage => _successMessage;
 
+  /// Un login solo es exitoso si termina en una sesión realmente autenticada.
+  ///
+  /// La validación fuerte vive en `AuthService.login()`: si el backend responde
+  /// 2xx pero omite el token, el servicio lanza una excepción y la UI muestra
+  /// el mensaje como fallo de autenticación, no como éxito parcial.
   Future<bool> login({required String email, required String password}) async {
     _startRequest();
 
     try {
       _currentUser = await _authService.login(email: email, password: password);
       _errorMessage = null;
+      _successMessage = null;
       return true;
     } catch (error) {
+      _currentUser = null;
       _errorMessage = error.toString().replaceFirst('Exception: ', '');
       return false;
     } finally {
@@ -36,7 +46,13 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> register({
+  /// Ejecuta el registro y traduce el resultado técnico a estado observable.
+  ///
+  /// La UI necesita distinguir entre:
+  /// - éxito autenticado (entra a Home);
+  /// - éxito sin sesión (vuelve al login con mensaje pedagógico);
+  /// - error real del backend.
+  Future<RegistrationResult> register({
     required String fullName,
     required String email,
     required String password,
@@ -45,17 +61,22 @@ class AuthProvider extends ChangeNotifier {
     _startRequest();
 
     try {
-      _currentUser = await _authService.register(
+      final result = await _authService.register(
         fullName: fullName,
         email: email,
         password: password,
         phone: phone,
       );
+
+      _currentUser = result.session;
       _errorMessage = null;
-      return true;
+      _successMessage = result.message;
+      return result;
     } catch (error) {
+      _currentUser = null;
       _errorMessage = error.toString().replaceFirst('Exception: ', '');
-      return false;
+      _successMessage = null;
+      return RegistrationResult.failure();
     } finally {
       _finishRequest();
     }
@@ -64,6 +85,7 @@ class AuthProvider extends ChangeNotifier {
   void logout() {
     _currentUser = null;
     _errorMessage = null;
+    _successMessage = null;
     notifyListeners();
   }
 
@@ -72,9 +94,15 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearSuccess() {
+    _successMessage = null;
+    notifyListeners();
+  }
+
   void _startRequest() {
     _isLoading = true;
     _errorMessage = null;
+    _successMessage = null;
     notifyListeners();
   }
 

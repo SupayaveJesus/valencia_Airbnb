@@ -84,16 +84,8 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: ink,
         ),
-        bodyLarge: const TextStyle(
-          fontSize: 16,
-          height: 1.6,
-          color: ink,
-        ),
-        bodyMedium: const TextStyle(
-          fontSize: 14,
-          height: 1.6,
-          color: mutedInk,
-        ),
+        bodyLarge: const TextStyle(fontSize: 16, height: 1.6, color: ink),
+        bodyMedium: const TextStyle(fontSize: 14, height: 1.6, color: mutedInk),
         labelLarge: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w600,

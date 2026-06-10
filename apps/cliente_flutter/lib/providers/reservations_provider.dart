@@ -16,11 +16,29 @@ class ReservationsProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   ReservationModel? _lastCreatedReservation;
+  String? _sessionFingerprint;
 
   List<ReservationModel> get reservations => _reservations;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   ReservationModel? get lastCreatedReservation => _lastCreatedReservation;
+
+  /// Reservas y feedback de creación son 100% dependientes de la sesión.
+  /// Si el usuario cambia y dejamos este estado vivo, la UI puede mostrar una
+  /// reserva ajena hasta que llegue otra carga. Preferimos reset inmediato.
+  void syncSession(UserSession? user) {
+    final nextFingerprint = _buildSessionFingerprint(user);
+    if (_sessionFingerprint == nextFingerprint) {
+      return;
+    }
+
+    _sessionFingerprint = nextFingerprint;
+    _reservations = [];
+    _lastCreatedReservation = null;
+    _errorMessage = null;
+    _isLoading = false;
+    notifyListeners();
+  }
 
   Future<bool> createReservation({
     required UserSession user,
@@ -67,5 +85,13 @@ class ReservationsProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  String? _buildSessionFingerprint(UserSession? user) {
+    if (user == null || !user.hasToken) {
+      return null;
+    }
+
+    return '${user.id}|${user.email}|${user.token}';
   }
 }

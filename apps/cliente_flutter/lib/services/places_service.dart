@@ -1,6 +1,8 @@
+import '../config/app_environment.dart';
 import '../models/place_model.dart';
 import '../models/search_filters.dart';
 import 'api_client.dart';
+import 'mock/mock_cliente_data.dart';
 
 class PlacesService {
   PlacesService({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
@@ -8,6 +10,10 @@ class PlacesService {
   final ApiClient _apiClient;
 
   Future<List<PlaceModel>> searchPlaces(SearchFilters filters) async {
+    if (AppEnvironment.useMockServices) {
+      return MockClienteData.searchPlaces(filters);
+    }
+
     final response = await _apiClient.postResultToCandidates(
       paths: const ['/api/lugares/search', '/lugares/search'],
       body: filters.toSimplePayload(),
@@ -15,11 +21,18 @@ class PlacesService {
 
     final places = _normalizeList(response.response.data);
     return places
-        .map((item) => PlaceModel.fromJson(item, preferredBaseUrl: response.baseUrl))
+        .map(
+          (item) =>
+              PlaceModel.fromJson(item, preferredBaseUrl: response.baseUrl),
+        )
         .toList();
   }
 
   Future<List<PlaceModel>> advancedSearch(SearchFilters filters) async {
+    if (AppEnvironment.useMockServices) {
+      return MockClienteData.advancedSearch(filters);
+    }
+
     final response = await _apiClient.postResultToCandidates(
       paths: const ['/api/lugares/advancedsearch', '/lugares/advancedsearch'],
       body: filters.toAdvancedPayload(),
@@ -27,11 +40,18 @@ class PlacesService {
 
     final places = _normalizeList(response.response.data);
     return places
-        .map((item) => PlaceModel.fromJson(item, preferredBaseUrl: response.baseUrl))
+        .map(
+          (item) =>
+              PlaceModel.fromJson(item, preferredBaseUrl: response.baseUrl),
+        )
         .toList();
   }
 
   Future<PlaceModel> getPlaceById(int id) async {
+    if (AppEnvironment.useMockServices) {
+      return MockClienteData.getPlaceById(id);
+    }
+
     final response = await _apiClient.getResultToCandidates(
       paths: ['/api/lugares/$id', '/lugares/$id'],
     );

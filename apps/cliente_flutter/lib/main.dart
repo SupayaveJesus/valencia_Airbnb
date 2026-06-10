@@ -7,6 +7,7 @@ import 'providers/places_provider.dart';
 import 'providers/reservations_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'widgets/mock_mode_indicator.dart';
 
 void main() {
   runApp(const PracticoFinalApp());
@@ -24,13 +25,35 @@ class PracticoFinalApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => PlacesProvider()),
-        ChangeNotifierProvider(create: (_) => ReservationsProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, PlacesProvider>(
+          create: (_) => PlacesProvider(),
+          update: (_, authProvider, placesProvider) {
+            final provider = placesProvider ?? PlacesProvider();
+            provider.syncSession(authProvider.currentUser);
+            return provider;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, ReservationsProvider>(
+          create: (_) => ReservationsProvider(),
+          update: (_, authProvider, reservationsProvider) {
+            final provider = reservationsProvider ?? ReservationsProvider();
+            provider.syncSession(authProvider.currentUser);
+            return provider;
+          },
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'StayHub Cliente',
         theme: AppTheme.lightTheme,
+        builder: (context, child) {
+          return Stack(
+            children: [
+              child ?? const SizedBox.shrink(),
+              const MockModeIndicator(),
+            ],
+          );
+        },
         home: Consumer<AuthProvider>(
           builder: (context, authProvider, _) {
             if (authProvider.isAuthenticated) {

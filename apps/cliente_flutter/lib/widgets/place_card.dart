@@ -26,7 +26,9 @@ class PlaceCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
               child: place.imageUrl.isEmpty
                   ? Container(
                       height: 180,
@@ -43,7 +45,10 @@ class PlaceCard extends StatelessWidget {
                         height: 180,
                         color: const Color(0xFFF1F1F1),
                         alignment: Alignment.center,
-                        child: const Icon(Icons.broken_image_outlined, size: 48),
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          size: 48,
+                        ),
                       ),
                     ),
             ),

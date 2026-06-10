@@ -1,9 +1,11 @@
+import '../config/app_environment.dart';
 import '../models/place_model.dart';
 import '../models/reservation_model.dart';
 import '../models/reservation_quote.dart';
 import '../models/search_filters.dart';
 import '../models/user_session.dart';
 import 'api_client.dart';
+import 'mock/mock_cliente_data.dart';
 
 class ReservationsService {
   ReservationsService({ApiClient? apiClient})
@@ -16,6 +18,14 @@ class ReservationsService {
     required PlaceModel place,
     required SearchFilters filters,
   }) async {
+    if (AppEnvironment.useMockServices) {
+      return MockClienteData.createReservation(
+        user: user,
+        place: place,
+        filters: filters,
+      );
+    }
+
     final quote = ReservationQuote.fromPlaceAndFilters(
       place: place,
       filters: filters,
@@ -41,8 +51,15 @@ class ReservationsService {
   }
 
   Future<List<ReservationModel>> getClientReservations(UserSession user) async {
+    if (AppEnvironment.useMockServices) {
+      return MockClienteData.getClientReservations(user);
+    }
+
     final response = await _apiClient.getResultToCandidates(
-      paths: ['/api/reservas/cliente/${user.id}', '/reservas/cliente/${user.id}'],
+      paths: [
+        '/api/reservas/cliente/${user.id}',
+        '/reservas/cliente/${user.id}',
+      ],
       token: user.token,
     );
 

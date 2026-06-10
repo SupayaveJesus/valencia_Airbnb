@@ -71,7 +71,9 @@ class SearchFilters {
   Map<String, dynamic> toAdvancedPayload() {
     return {
       'ciudad': city.trim(),
-      'descripcion': description.trim().isEmpty ? 'opcional' : description.trim(),
+      'descripcion': description.trim().isEmpty
+          ? 'opcional'
+          : description.trim(),
       'cantPersonas': guests,
       'cantCamas': beds,
       'cantBanios': baths,

@@ -60,7 +60,9 @@ class ReservationModel {
         json['fechaFin'] ?? json['fecha_fin'],
         fallback: '-',
       ),
-      nights: _readInt(json['cantidadNoches'] ?? json['cantNoches'] ?? json['noches']),
+      nights: _readInt(
+        json['cantidadNoches'] ?? json['cantNoches'] ?? json['noches'],
+      ),
       total: _readDouble(json['precioTotal'] ?? json['total']),
       rawData: json,
     );

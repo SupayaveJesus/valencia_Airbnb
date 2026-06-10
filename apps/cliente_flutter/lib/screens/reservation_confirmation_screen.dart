@@ -47,7 +47,10 @@ class ReservationConfirmationScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Resumen económico', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Resumen económico',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 16),
                   _PriceRow(
                     label: '${quote.nights} noche(s) x ${place.priceLabel}',
@@ -56,7 +59,11 @@ class ReservationConfirmationScreen extends StatelessWidget {
                   _PriceRow(label: 'Limpieza', amount: quote.cleaningFee),
                   _PriceRow(label: 'Servicio (10%)', amount: quote.serviceFee),
                   const Divider(height: 32),
-                  _PriceRow(label: 'Total', amount: quote.total, emphasize: true),
+                  _PriceRow(
+                    label: 'Total',
+                    amount: quote.total,
+                    emphasize: true,
+                  ),
                 ],
               ),
             ),
@@ -65,7 +72,10 @@ class ReservationConfirmationScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Qué se envía a la API', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Qué se envía a la API',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 12),
                   const Text(
                     'La confirmación manda lugar_id, cliente_id, fechas y precios desglosados porque así está documentado el endpoint de reservas.',
@@ -74,7 +84,10 @@ class ReservationConfirmationScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       'Error real del backend: ${provider.errorMessage}',
-                      style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ],
@@ -87,11 +100,13 @@ class ReservationConfirmationScreen extends StatelessWidget {
               isLoading: provider.isLoading,
               onPressed: () async {
                 provider.clearFeedback();
-                final success = await context.read<ReservationsProvider>().createReservation(
-                  user: user,
-                  place: place,
-                  filters: filters,
-                );
+                final success = await context
+                    .read<ReservationsProvider>()
+                    .createReservation(
+                      user: user,
+                      place: place,
+                      filters: filters,
+                    );
 
                 if (!context.mounted || !success) {
                   return;

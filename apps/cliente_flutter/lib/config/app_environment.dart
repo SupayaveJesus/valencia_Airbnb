@@ -1,6 +1,21 @@
 class AppEnvironment {
   AppEnvironment._();
 
+  /// CONTINGENCIA TEMPORAL PARA LA DEFENSA / DEMO.
+  ///
+  /// Cambia este valor a `false` cuando quieras volver a usar solamente la API
+  /// real del docente. La idea es que exista UN ÚNICO punto obvio de cambio,
+  /// fácil de mostrar y fácil de revertir cuando el backend vuelva a estar
+  /// estable.
+  static const bool useMockServices = true;
+
+  /// Indicador visual simple para evitar confundir una demo mock con datos
+  /// verdaderos del backend.
+  static const bool showMockIndicator = true;
+
+  static String get dataSourceLabel =>
+      useMockServices ? 'MOCK / CONTINGENCIA' : 'API REAL';
+
   /// Orden de prioridad exigido para resolver el backend.
   static const List<String> baseUrls = [
     'https://airbnbmob2.site',

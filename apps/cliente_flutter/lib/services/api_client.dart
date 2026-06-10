@@ -77,7 +77,8 @@ class ApiClient {
   }
 
   Future<ApiRequestResult> _requestCandidates({
-    required Future<Response<dynamic>> Function(String url, Options options) executor,
+    required Future<Response<dynamic>> Function(String url, Options options)
+    executor,
     required List<String> paths,
     String? token,
   }) async {
@@ -106,7 +107,9 @@ class ApiClient {
           );
 
           if (statusCode == 401 || statusCode == 422) {
-            throw Exception(message.isEmpty ? 'La API rechazó la solicitud.' : message);
+            throw Exception(
+              message.isEmpty ? 'La API rechazó la solicitud.' : message,
+            );
           }
         } on DioException catch (error) {
           attempts.add('$url -> ${error.message ?? 'Error de red'}');

@@ -29,13 +29,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  /// Envía el formulario y decide QUÉ pantalla mostrar según la respuesta real.
+  ///
+  /// La decisión importante del bugfix está acá:
+  /// - si hay sesión válida, volvemos al inicio para continuar autenticados;
+  /// - si el registro fue exitoso pero sin token, regresamos al login con un
+  ///   mensaje explícito en lugar de inventar un error de servidor.
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.register(
+    final result = await authProvider.register(
       fullName: _nameController.text,
       email: _emailController.text,
       password: _passwordController.text,
@@ -46,15 +52,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    if (success) {
+    if (result.isAuthenticated) {
       Navigator.of(context).popUntil((route) => route.isFirst);
       return;
     }
 
+    if (result.isSuccess) {
+      // Devolvemos el mensaje a LoginScreen para que la persona usuaria vea un
+      // feedback claro en el contexto correcto: "tu cuenta ya existe, ahora
+      // iniciá sesión".
+      Navigator.of(context).pop(result.message);
+      return;
+    }
+
     if (authProvider.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authProvider.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(authProvider.errorMessage!)));
     }
   }
 
@@ -74,7 +88,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Crear cuenta cliente', style: theme.textTheme.titleLarge),
+                  Text(
+                    'Crear cuenta cliente',
+                    style: theme.textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'El formulario sigue el requerimiento del PDF: nombre completo, email, contraseña y teléfono.',

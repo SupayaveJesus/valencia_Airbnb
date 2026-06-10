@@ -18,6 +18,12 @@ class UserSession {
   String get displayName => fullName.isEmpty ? email : fullName;
   bool get hasIdentifier => id > 0;
 
+  /// Tener usuario parseado NO siempre significa tener sesión abierta.
+  ///
+  /// Para este práctico, consideramos autenticada únicamente una respuesta
+  /// que trae token usable.
+  bool get hasToken => token.trim().isNotEmpty;
+
   factory UserSession.fromJson(Map<String, dynamic> json) {
     final nestedUser = _extractNestedUser(json);
 

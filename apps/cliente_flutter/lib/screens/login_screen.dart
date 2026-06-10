@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../config/app_environment.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/minimal_card.dart';
@@ -42,16 +43,30 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(authProvider.errorMessage!)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(authProvider.errorMessage!)));
   }
 
-  void _goToRegister() {
-    Navigator.push(
+  /// Abre el registro y escucha si vuelve con un mensaje de éxito diferido.
+  ///
+  /// Esto permite mostrar el aviso en la pantalla de login cuando el backend
+  /// registra correctamente pero decide NO autenticar en la misma respuesta.
+  Future<void> _goToRegister() async {
+    final registrationMessage = await Navigator.push<String?>(
       context,
       MaterialPageRoute(builder: (_) => const RegisterScreen()),
     );
+
+    if (!mounted ||
+        registrationMessage == null ||
+        registrationMessage.isEmpty) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(registrationMessage)));
   }
 
   @override
@@ -73,6 +88,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Inicia sesión para buscar alojamientos con una interfaz simple, limpia y enfocada en el flujo cliente del PDF.',
                 style: theme.textTheme.bodyLarge,
               ),
+              if (AppEnvironment.useMockServices) ...[
+                const SizedBox(height: 12),
+                Text(
+                  'Modo contingencia activo: puedes ingresar con demo@stayhub.com y contraseña 123456, o registrar un usuario mock y luego usarlo en el login.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF92400E),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
               const SizedBox(height: 32),
               MinimalCard(
                 child: Form(
@@ -134,7 +159,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-             
             ],
           ),
         ),

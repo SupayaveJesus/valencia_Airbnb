@@ -42,8 +42,9 @@ class PlaceModel {
   final Map<String, dynamic> rawData;
 
   String get capacityLabel => '$capacity huéspedes';
-  String get priceLabel =>
-      pricePerNight <= 0 ? 'Precio no disponible' : 'Bs. ${pricePerNight.toStringAsFixed(2)} / noche';
+  String get priceLabel => pricePerNight <= 0
+      ? 'Precio no disponible'
+      : 'Bs. ${pricePerNight.toStringAsFixed(2)} / noche';
   String get wifiLabel => hasWifi ? 'Wi-Fi disponible' : 'Sin Wi-Fi informado';
   String get parkingLabel => parkingSpots > 0
       ? 'Parqueo para $parkingSpots vehículo${parkingSpots == 1 ? '' : 's'}'
@@ -58,12 +59,18 @@ class PlaceModel {
 
     return PlaceModel(
       id: _readInt(json['id']),
-      name: _readString(json['nombre'] ?? json['name'], fallback: 'Lugar sin nombre'),
+      name: _readString(
+        json['nombre'] ?? json['name'],
+        fallback: 'Lugar sin nombre',
+      ),
       description: _readString(
         json['descripcion'] ?? json['description'],
         fallback: 'Sin descripción disponible.',
       ),
-      city: _readString(json['ciudad'] ?? json['city'], fallback: 'Ciudad no informada'),
+      city: _readString(
+        json['ciudad'] ?? json['city'],
+        fallback: 'Ciudad no informada',
+      ),
       imageUrl: photos.isEmpty ? '' : photos.first,
       galleryUrls: photos,
       capacity: _readInt(json['cantPersonas'] ?? json['capacidad']),
@@ -110,7 +117,9 @@ class PlaceModel {
 
         if (item is Map) {
           final mapped = Map<String, dynamic>.from(item);
-          final path = _readString(mapped['url'] ?? mapped['foto'] ?? mapped['path']);
+          final path = _readString(
+            mapped['url'] ?? mapped['foto'] ?? mapped['path'],
+          );
           if (path.isNotEmpty) {
             photos.add(
               AppEnvironment.resolveAssetUrl(
