@@ -17,12 +17,16 @@ class ReservationsScreen extends StatefulWidget {
 }
 
 class _ReservationsScreenState extends State<ReservationsScreen> {
+  // Este flag separa la primera carga completa de los refresh posteriores para
+  // poder mostrar un loader inicial claro sin parpadeos extraños.
   bool _showInitialLoader = true;
 
   @override
   void initState() {
     super.initState();
 
+    // Se difiere la carga al primer frame porque initState todavía no es buen
+    // lugar para disparar lógica que depende de un contexto totalmente montado.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) {
         return;
@@ -41,6 +45,8 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   }
 
   Future<void> _loadReservations() async {
+    // La API de reservas necesita un usuario con identificador persistido; si
+    // esa base no existe, abortamos antes de golpear el backend inútilmente.
     final user = context.read<AuthProvider>().currentUser;
     if (user == null || !user.hasIdentifier) {
       return;
@@ -64,6 +70,8 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   }
 
   PlaceModel _buildPlacePreview(ReservationModel reservation) {
+    // La reserva trae datos anidados del lugar en formatos variables; armamos
+    // un preview mínimo y seguro para poder abrir la pantalla de detalle.
     final placeData = _extractMapOrFirstItem(reservation.rawData['lugar']);
 
     return PlaceModel.fromJson({
@@ -77,6 +85,8 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   }
 
   Map<String, dynamic> _extractMapOrFirstItem(Object? value) {
+    // Algunos endpoints devuelven "lugar" como objeto y otros como lista con un
+    // solo elemento; este helper normaliza ambos casos.
     if (value is List && value.isNotEmpty) {
       return _extractMapOrFirstItem(value.first);
     }
@@ -221,6 +231,8 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
               itemBuilder: (context, index) {
                 final reservation = provider.reservations[index];
 
+                // Cada card funciona como acceso rápido al detalle del lugar que
+                // originó la reserva, útil para defender trazabilidad del flujo.
                 return Material(
                   color: Colors.transparent,
                   child: InkWell(

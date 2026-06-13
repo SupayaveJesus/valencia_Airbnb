@@ -13,6 +13,8 @@ class SearchResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Esta pantalla no consulta sola: solo representa el estado que el provider
+    // dejó listo después de la búsqueda simple o avanzada.
     final provider = context.watch<PlacesProvider>();
     final theme = Theme.of(context);
     final filters = provider.lastFilters;
@@ -32,6 +34,8 @@ class SearchResultsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               if (provider.errorMessage != null) ...[
+                // Si hubo error pero la navegación llegó igual, lo mostramos
+                // arriba para que el usuario entienda por qué no hay resultados.
                 MinimalCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,6 +78,8 @@ class SearchResultsScreen extends StatelessWidget {
                   ),
                 )
               else ...[
+                // Con resultados, cada tarjeta puede abrir el detalle usando los
+                // filtros originales para habilitar la reserva posterior.
                 Expanded(
                   child: Column(
                     children: [
@@ -107,6 +113,8 @@ class SearchResultsScreen extends StatelessWidget {
                         label: 'Vista de mapa',
                         icon: Icons.map_outlined,
                         isSecondary: true,
+                        // La vista de mapa reutiliza la misma lista recibida; no
+                        // dispara otra consulta ni altera el estado del provider.
                         onPressed: () {
                           Navigator.push(
                             context,

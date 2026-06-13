@@ -24,12 +24,15 @@ class PlaceDetailScreen extends StatefulWidget {
 }
 
 class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
+  // Guardamos el Future en estado para no relanzar la carga del detalle en cada
+  // rebuild; FutureBuilder solo observa el mismo pedido hasta reintentar.
   late Future<PlaceModel> _detailFuture;
   int _selectedPhotoIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    // La vista entra con un preview y luego pide el detalle completo al backend.
     _detailFuture = context.read<PlacesProvider>().loadPlaceDetail(
       widget.placePreview.id,
     );
@@ -52,6 +55,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
             return _buildError(context, snapshot.error.toString());
           }
 
+          // Si el detalle real todavía no llegó o falló parcialmente, usamos el
+          // preview para no dejar la pantalla vacía.
           final place = snapshot.data ?? widget.placePreview;
           final gallery = place.galleryUrls.isEmpty ? [''] : place.galleryUrls;
           final safeIndex = _selectedPhotoIndex >= gallery.length
@@ -63,6 +68,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
             children: [
               _buildHeroImage(gallery[safeIndex]),
               if (gallery.length > 1) ...[
+                // La mini galería solo cambia el índice local; no vuelve a pedir
+                // información al provider ni al servidor.
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 78,
@@ -139,6 +146,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   label: 'Reservar este lugar',
                   icon: Icons.credit_card_outlined,
                   onPressed: () {
+                    // Solo desde una búsqueda con fechas tiene sentido reservar,
+                    // porque la siguiente pantalla necesita esos filtros.
                     final user = context.read<AuthProvider>().currentUser;
                     if (user == null) {
                       return;
@@ -176,6 +185,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   }
 
   Widget _buildHeroImage(String imageUrl) {
+    // Cuando no hay imagen válida, devolvemos un placeholder consistente para
+    // mantener el layout sin depender de datos perfectos del backend.
     if (imageUrl.isEmpty) {
       return Container(
         height: 260,
@@ -206,6 +217,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   }
 
   Widget _buildError(BuildContext context, String rawMessage) {
+    // Este estado se usa solo cuando no hay ni preview ni detalle completo; por
+    // eso ofrece reintento en lugar de dejar una pantalla muerta.
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),

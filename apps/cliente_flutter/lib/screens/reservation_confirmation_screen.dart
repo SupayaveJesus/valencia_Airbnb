@@ -24,6 +24,8 @@ class ReservationConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // El quote se calcula localmente para que el usuario vea el resumen antes de
+    // confirmar; la creación real de la reserva ocurre recién al enviar.
     final quote = ReservationQuote.fromPlaceAndFilters(
       place: place,
       filters: filters,
@@ -86,6 +88,8 @@ class ReservationConfirmationScreen extends StatelessWidget {
               icon: Icons.check_circle_outline,
               isLoading: provider.isLoading,
               onPressed: () async {
+                // Limpiamos mensajes previos para no arrastrar errores viejos a
+                // un nuevo intento de confirmación.
                 provider.clearFeedback();
                 final success = await context
                     .read<ReservationsProvider>()
@@ -99,6 +103,8 @@ class ReservationConfirmationScreen extends StatelessWidget {
                   return;
                 }
 
+                // Tras confirmar, reemplazamos esta pantalla por "Mis reservas"
+                // para evitar volver atrás a un resumen ya consumido.
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const ReservationsScreen()),

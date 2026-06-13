@@ -27,12 +27,16 @@ class MapResultsScreen extends StatefulWidget {
 }
 
 class _MapResultsScreenState extends State<MapResultsScreen> {
+  // El mapa solo trabaja con resultados que tienen coordenadas válidas; el resto
+  // sigue existiendo en la lista, pero no puede convertirse en marcador.
   late final List<PlaceModel> _placesWithCoordinates;
   PlaceModel? _selectedPlace;
 
   @override
   void initState() {
     super.initState();
+    // Precalculamos esta lista una sola vez porque depende solo de los datos de
+    // entrada y no del estado interactivo del mapa.
     _placesWithCoordinates = widget.results
         .where(_hasValidCoordinates)
         .toList(growable: false);
@@ -76,6 +80,8 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                 Expanded(child: _buildNoCoordinatesState(theme))
               else ...[
                 if (_placesWithCoordinates.length != widget.results.length) ...[
+                  // Avisamos la diferencia para que en la defensa quede claro que
+                  // lista y mapa no siempre muestran exactamente lo mismo.
                   MinimalCard(
                     child: Text(
                       'Mostramos ${_placesWithCoordinates.length} marcador(es). '
@@ -88,11 +94,11 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                 Expanded(
                   child: Column(
                     children: [
-                       Expanded(
-                         child: ClipRRect(
-                           borderRadius: BorderRadius.circular(24),
-                           child: FlutterMap(
-                            options: MapOptions(
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: FlutterMap(
+                             options: MapOptions(
                               initialCenter: _selectedPlace == null
                                   ? const LatLng(-17.7833, -63.1821)
                                   : _toLatLng(_selectedPlace!),
@@ -108,9 +114,11 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                                       padding: const EdgeInsets.all(56),
                                     )
                                   : null,
-                              onTap: (_, point) => setState(() {
-                                _selectedPlace = null;
-                              }),
+                               onTap: (_, point) => setState(() {
+                                 // Tocar el fondo limpia la selección actual y
+                                 // deja visible el estado neutro del panel.
+                                 _selectedPlace = null;
+                               }),
                             ),
                             children: [
                               TileLayer(
@@ -129,6 +137,8 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                                         child: GestureDetector(
                                           onTap: () {
                                             setState(() {
+                                              // El marcador solo cambia la tarjeta
+                                              // inferior; no hace navegación aún.
                                               _selectedPlace = place;
                                             });
                                           },
@@ -231,6 +241,8 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
   }
 
   bool _hasValidCoordinates(PlaceModel place) {
+    // Filtramos coordenadas fuera de rango y el caso 0,0 porque suele indicar
+    // dato faltante más que una ubicación real del alojamiento.
     final latitude = place.latitude;
     final longitude = place.longitude;
 
@@ -313,6 +325,8 @@ class _SelectedPlaceCard extends StatelessWidget {
           PrimaryButton(
             label: 'Ver detalle del lugar',
             icon: Icons.arrow_forward_outlined,
+            // Solo navegamos al detalle cuando existen filtros, porque ese dato
+            // es el que habilita la continuación hacia la reserva.
             onPressed: () {
               Navigator.push(
                 context,

@@ -18,6 +18,8 @@ class AdvancedSearchScreen extends StatefulWidget {
 }
 
 class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
+  // Aquí replicamos los filtros en controllers porque esta pantalla permite
+  // editar cada campo antes de reconstruir un SearchFilters completo.
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _cityController;
   late final TextEditingController _checkInController;
@@ -36,6 +38,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
   @override
   void initState() {
     super.initState();
+    // Se parte de los filtros ya elegidos en Home para que la búsqueda avanzada
+    // sea una continuación del flujo y no un formulario vacío independiente.
     final filters = widget.initialFilters;
     _cityController = TextEditingController(text: filters.city);
     _checkIn = filters.checkIn;
@@ -60,6 +64,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
 
   @override
   void dispose() {
+    // Como los controllers se crean manualmente, también se destruyen aquí.
     _cityController.dispose();
     _checkInController.dispose();
     _checkOutController.dispose();
@@ -74,6 +79,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
   }
 
   Future<void> _submit() async {
+    // copyWith evita reconstruir el filtro desde cero y deja explícito qué
+    // campos cambian en esta pantalla y cuáles se heredan del paso anterior.
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -99,6 +106,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
       return;
     }
 
+    // pushReplacement devuelve al usuario a la misma pantalla de resultados,
+    // reemplazando esta vista intermedia para que el back sea más natural.
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const SearchResultsScreen()),
@@ -106,6 +115,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
   }
 
   Future<void> _pickDate({required bool isCheckIn}) async {
+    // En búsqueda avanzada la salida nunca puede quedar antes de la llegada,
+    // por eso recalculamos automáticamente una fecha válida si hace falta.
     final now = DateUtils.dateOnly(DateTime.now());
     final firstDate = isCheckIn ? now : _checkIn;
     final currentValue = isCheckIn ? _checkIn : _checkOut;
@@ -133,6 +144,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
         _checkInController.text = _formatDate(selectedDate);
 
         if (!_checkOut.isAfter(selectedDate)) {
+          // Mantiene la coherencia del rango cuando cambia el check-in.
           _checkOut = selectedDate.add(const Duration(days: 1));
           _checkOutController.text = _formatDate(_checkOut);
         }
@@ -170,6 +182,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    // Bloque 1: datos base que toda búsqueda necesita.
                     AppTextField(
                       label: 'Ciudad',
                       controller: _cityController,
@@ -236,6 +249,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                       maxLines: 3,
                     ),
                     const SizedBox(height: 24),
+                    // Bloque 2: refinadores opcionales para mostrar dominio de
+                    // filtros sin ensuciar el flujo principal de Home.
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -291,6 +306,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                       onChanged: (value) => setState(() => _hasWifi = value),
                     ),
                     const SizedBox(height: 24),
+                    // Bloque 3: único punto de salida; primero valida y luego
+                    // delega al provider la consulta avanzada.
                     PrimaryButton(
                       label: 'Buscar lugares',
                       icon: Icons.tune,
@@ -312,6 +329,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
     TextEditingController controller,
     IconData icon,
   ) {
+    // Este helper evita repetir la misma validación numérica en cada filtro
+    // cuantitativo y mantiene homogéneo el formulario.
     return AppTextField(
       label: label,
       controller: controller,
