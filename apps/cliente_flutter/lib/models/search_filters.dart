@@ -62,20 +62,19 @@ class SearchFilters {
     );
   }
 
-  /// La búsqueda simple envía solo el texto principal que el backend espera en
-  /// `search`. El resto de criterios viven en la búsqueda avanzada.
+  /// Postman muestra que la búsqueda simple usa `search`.
   Map<String, dynamic> toSimplePayload() {
     return {'search': city.trim()};
   }
 
-  /// La búsqueda avanzada conserva el formulario docente, pero arma el body con
-  /// el contrato real que consume la API.
+  /// El PDF pide más campos y Postman confirma el shape esperado del body.
   Map<String, dynamic> toAdvancedPayload() {
     final payload = <String, dynamic>{
       'ciudad': city.trim(),
-      // Si la persona no pidió filtrar por Wi‑Fi, el campo debe omitirse.
-      // En la UX eso evita convertir "no elegí nada" en un "solo mostrar sin
-      // Wi‑Fi", que sería una búsqueda distinta.
+      // En mock usábamos valores "comodín" para que siempre hubiera matches.
+      // Con API real eso se vuelve ruido: si la persona no pidió filtrar por
+      // Wi-Fi, debemos omitir el campo y NO colapsarlo al mismo valor que
+      // "Wi-Fi = no".
       'descripcion': description.trim(),
       'cantPersonas': guests,
       'cantCamas': beds,
