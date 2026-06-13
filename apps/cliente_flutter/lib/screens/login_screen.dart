@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../config/app_environment.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/minimal_card.dart';
@@ -18,6 +17,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // Los controllers son el puente entre formulario y provider. La pantalla
+  // captura texto; la decisión de autenticación vive fuera de la UI.
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -33,6 +35,9 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    // Flujo completo del submit:
+    // formulario valida -> provider coordina estado -> service consulta la API
+    // -> vuelve una sesión usable o un error -> la UI reacciona al resultado.
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.login(
       email: _emailController.text,
@@ -48,10 +53,10 @@ class _LoginScreenState extends State<LoginScreen> {
     ).showSnackBar(SnackBar(content: Text(authProvider.errorMessage!)));
   }
 
-  /// Abre el registro y escucha si vuelve con un mensaje de éxito diferido.
+  /// Abre registro y escucha si vuelve con un mensaje para este contexto.
   ///
-  /// Esto permite mostrar el aviso en la pantalla de login cuando el backend
-  /// registra correctamente pero decide NO autenticar en la misma respuesta.
+  /// Así Login puede explicar el siguiente paso cuando la cuenta se crea bien,
+  /// pero la API espera un inicio de sesión explícito después del registro.
   Future<void> _goToRegister() async {
     final registrationMessage = await Navigator.push<String?>(
       context,
@@ -83,22 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 32),
               Text('StayHub', style: theme.textTheme.headlineLarge),
-              const SizedBox(height: 12),
-              Text(
-                'Inicia sesión para buscar alojamientos con una interfaz simple, limpia y enfocada en el flujo cliente del PDF.',
-                style: theme.textTheme.bodyLarge,
-              ),
-              if (AppEnvironment.useMockServices) ...[
-                const SizedBox(height: 12),
-                Text(
-                  'Modo contingencia activo: puedes ingresar con demo@stayhub.com y contraseña 123456, o registrar un usuario mock y luego usarlo en el login.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF92400E),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
               const SizedBox(height: 32),
+              // `watch()` reconstruye la pantalla cuando cambia el estado de auth.
+              // Por eso loading, errores y navegación responden al provider sin
+              // duplicar estado local para cada request.
               MinimalCard(
                 child: Form(
                   key: _formKey,

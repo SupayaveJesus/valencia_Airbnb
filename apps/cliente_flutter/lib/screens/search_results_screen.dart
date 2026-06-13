@@ -1,4 +1,3 @@
-import '../config/app_environment.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -33,9 +32,7 @@ class SearchResultsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                AppEnvironment.useMockServices
-                    ? 'Los resultados provienen del modo mock de contingencia para sostener la demo aun si el backend falla.'
-                    : 'Si la API falla, la pantalla muestra el error real devuelto por los intentos a cada endpoint. No hay datos demo.',
+                'Esta pantalla muestra exactamente lo que devolvió la búsqueda anterior. Si la API responde con error, el mensaje también se conserva para explicar por qué no hubo resultados renderizables.',
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),

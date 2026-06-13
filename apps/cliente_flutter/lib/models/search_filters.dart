@@ -62,26 +62,34 @@ class SearchFilters {
     );
   }
 
-  /// Postman muestra que la búsqueda simple usa `search`.
+  /// La búsqueda simple envía solo el texto principal que el backend espera en
+  /// `search`. El resto de criterios viven en la búsqueda avanzada.
   Map<String, dynamic> toSimplePayload() {
     return {'search': city.trim()};
   }
 
-  /// El PDF pide más campos y Postman confirma el shape esperado del body.
+  /// La búsqueda avanzada conserva el formulario docente, pero arma el body con
+  /// el contrato real que consume la API.
   Map<String, dynamic> toAdvancedPayload() {
-    return {
+    final payload = <String, dynamic>{
       'ciudad': city.trim(),
-      'descripcion': description.trim().isEmpty
-          ? 'opcional'
-          : description.trim(),
+      // Si la persona no pidió filtrar por Wi‑Fi, el campo debe omitirse.
+      // En la UX eso evita convertir "no elegí nada" en un "solo mostrar sin
+      // Wi‑Fi", que sería una búsqueda distinta.
+      'descripcion': description.trim(),
       'cantPersonas': guests,
       'cantCamas': beds,
       'cantBanios': baths,
       'cantHabitaciones': rooms,
-      'tieneWifi': hasWifi == null ? 0 : (hasWifi! ? 1 : 0),
       'cantVehiculosParqueo': parkingSpots,
       'precioNoche': maxPricePerNight,
     };
+
+    if (hasWifi != null) {
+      payload['tieneWifi'] = hasWifi! ? 1 : 0;
+    }
+
+    return payload;
   }
 
   static String _formatApiDate(DateTime date) {

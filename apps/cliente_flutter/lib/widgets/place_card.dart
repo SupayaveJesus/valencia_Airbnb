@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import '../config/app_theme.dart';
 import '../models/place_model.dart';
 
+/// Presenta un lugar con el mismo contrato visual en listados y resultados.
+///
+/// La tarjeta protege una UX consistente: foto o fallback si la API no trae una
+/// imagen utilizable, resumen legible del alojamiento y datos clave para decidir
+/// rápido antes de navegar al detalle.
 class PlaceCard extends StatelessWidget {
   const PlaceCard({super.key, required this.place, this.onTap});
 

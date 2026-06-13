@@ -10,6 +10,13 @@ import '../widgets/minimal_card.dart';
 import '../widgets/primary_button.dart';
 import 'reservations_screen.dart';
 
+/// Pantalla puente entre "quiero reservar" y "la reserva quedó creada".
+///
+/// Flujo que defiende esta vista:
+/// 1. recibe lugar + filtros + usuario desde la búsqueda/detalle,
+/// 2. calcula una cotización local para mostrar exactamente qué se cobrará,
+/// 3. delega la confirmación al provider,
+/// 4. si la API responde bien, reemplaza la ruta por `ReservationsScreen`.
 class ReservationConfirmationScreen extends StatelessWidget {
   const ReservationConfirmationScreen({
     super.key,
@@ -24,6 +31,8 @@ class ReservationConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // La cotización se calcula en build porque depende solo de datos inmutables
+    // de entrada. No necesita estado propio ni request previa para explicarse.
     final quote = ReservationQuote.fromPlaceAndFilters(
       place: place,
       filters: filters,
@@ -78,7 +87,7 @@ class ReservationConfirmationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    'La confirmación manda lugar_id, cliente_id, fechas y precios desglosados porque así está documentado el endpoint de reservas.',
+                    'La confirmación envía lugar_id, cliente_id, fechas y precios desglosados. Si la API responde bien, este flujo redirige a “Mis reservas” para que la persona vea la reserva recién creada dentro de su historial real.',
                   ),
                   if (provider.errorMessage != null) ...[
                     const SizedBox(height: 16),
@@ -99,6 +108,11 @@ class ReservationConfirmationScreen extends StatelessWidget {
               icon: Icons.check_circle_outline,
               isLoading: provider.isLoading,
               onPressed: () async {
+                // Secuencia real del CTA:
+                // - limpia feedback viejo,
+                // - llama al provider,
+                // - si falla, la pantalla se queda acá y muestra error,
+                // - si funciona, redirige al historial para validar el alta.
                 provider.clearFeedback();
                 final success = await context
                     .read<ReservationsProvider>()
@@ -112,6 +126,9 @@ class ReservationConfirmationScreen extends StatelessWidget {
                   return;
                 }
 
+                // `pushReplacement` evita volver a una confirmación ya consumida
+                // con el botón back. UX: después del éxito, el siguiente paso es
+                // revisar el historial real, no reenviar accidentalmente el alta.
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const ReservationsScreen()),
@@ -138,6 +155,8 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Componente visual mínimo para mantener consistente el desglose de precios
+    // sin duplicar estilos entre subtotales y total general.
     final style = TextStyle(
       fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
       fontSize: emphasize ? 17 : 15,

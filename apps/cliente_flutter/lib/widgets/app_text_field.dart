@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+/// Centraliza la configuración base de los campos del formulario.
+///
+/// Mantener este contrato en un solo widget evita que login, registro y
+/// búsquedas diverjan en etiqueta, hint, iconografía o validaciones visibles.
 class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,

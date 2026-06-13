@@ -38,6 +38,8 @@ void main() {
         ),
       );
 
+      // Protege la convivencia entre mapa, selector y CTA del detalle cuando la
+      // búsqueda sí trae coordenadas que sirven para renderizar marcadores.
       expect(find.text('Vista de lista'), findsOneWidget);
       expect(find.text('Departamento Equipetrol'), findsOneWidget);
       expect(
@@ -60,6 +62,8 @@ void main() {
       ),
     );
 
+    // Cuando la API devuelve ubicaciones vacías o inválidas, la pantalla debe
+    // seguir guiando al usuario sin dejarlo atrapado en un mapa roto.
     expect(find.text('Resultados sin coordenadas válidas'), findsOneWidget);
     expect(find.text('Volver a la lista'), findsOneWidget);
   });
@@ -97,7 +101,7 @@ PlaceModel _place({
     parkingSpots: 1,
     pricePerNight: 30,
     cleaningCost: 5,
-    hostName: 'Anfitrión Demo',
+    hostName: 'Anfitrión real',
     latitude: latitude,
     longitude: longitude,
     rawData: const {},

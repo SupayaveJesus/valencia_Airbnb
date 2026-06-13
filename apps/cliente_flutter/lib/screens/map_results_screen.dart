@@ -32,10 +32,10 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
   @override
   void initState() {
     super.initState();
-    // El PDF pide que mapa y lista muestren LOS MISMOS resultados.
-    // Por eso no reconsultamos nada: solo filtramos lo estrictamente necesario
-    // para no dibujar marcadores corruptos cuando backend/mock envían 0,0 o
-    // coordenadas fuera del rango geográfico válido.
+    // Mapa y lista deben salir de la misma búsqueda para que la persona no vea
+    // dos respuestas distintas según la vista elegida. Solo filtramos lugares
+    // con coordenadas inválidas porque el mapa necesita latitud/longitud
+    // utilizables para dibujar marcadores coherentes.
     _placesWithCoordinates = widget.results
         .where(_hasValidCoordinates)
         .toList(growable: false);

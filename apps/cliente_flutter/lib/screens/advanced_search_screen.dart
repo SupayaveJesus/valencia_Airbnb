@@ -110,7 +110,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'El PDF pide ampliar los campos del lugar. Aquí mantenemos ese formulario y lo traducimos al shape real de Postman.',
+              'Aquí ampliamos la búsqueda sin cambiar la idea del ejercicio: el formulario captura filtros legibles para la persona y luego se traduce al body real que consume la API.',
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),

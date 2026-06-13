@@ -1,25 +1,22 @@
 class AppEnvironment {
   AppEnvironment._();
 
-  /// CONTINGENCIA TEMPORAL PARA LA DEFENSA / DEMO.
+  /// Configuración compartida del cliente Flutter.
   ///
-  /// Cambia este valor a `false` cuando quieras volver a usar solamente la API
-  /// real del docente. La idea es que exista UN ÚNICO punto obvio de cambio,
-  /// fácil de mostrar y fácil de revertir cuando el backend vuelva a estar
-  /// estable.
-  static const bool useMockServices = true;
-
-  /// Indicador visual simple para evitar confundir una demo mock con datos
-  /// verdaderos del backend.
-  static const bool showMockIndicator = true;
-
-  static String get dataSourceLabel =>
-      useMockServices ? 'MOCK / CONTINGENCIA' : 'API REAL';
+  /// Este módulo concentra decisiones de infraestructura que deben ser únicas
+  /// para toda la app, como hosts candidatos, rutas base y timeouts. La idea es
+  /// que todos los services hablen con la misma API real bajo la misma política.
 
   /// Orden de prioridad exigido para resolver el backend.
+  ///
+  /// Esta lista responde una pregunta arquitectónica, no visual: "¿qué host
+  /// intentamos primero cuando cualquier feature necesita la API?".
+  ///
+  /// La prioridad se define acá para que AuthService, PlacesService y compañía
+  /// reutilicen la misma resolución y no terminen consultando entornos distintos.
   static const List<String> baseUrls = [
-    'https://airbnbmob2.site',
     'http://67.205.172.167',
+    'https://airbnbmob2.site',
     'http://10.0.2.2:8000',
     'http://127.0.0.1:8000',
   ];
@@ -34,6 +31,10 @@ class AppEnvironment {
   ];
 
   /// Convierte rutas relativas del backend en URLs absolutas.
+  ///
+  /// El backend a veces entrega `/storage/...` en lugar de una URL completa.
+  /// Este helper transforma esa referencia en una URL usable para que la UI
+  /// solo piense en mostrar la imagen, no en reconstruir hosts manualmente.
   static String resolveAssetUrl(String rawPath, {String? preferredBaseUrl}) {
     final normalized = rawPath.trim();
 
@@ -45,6 +46,8 @@ class AppEnvironment {
       return normalized;
     }
 
+    // Si un service sabe qué host respondió, lo reutiliza para mantener la
+    // misma procedencia de datos y assets. Si no, usamos la base prioritaria.
     final base = preferredBaseUrl ?? baseUrls.first;
     final safePath = normalized.startsWith('/') ? normalized : '/$normalized';
     return '$base$safePath';

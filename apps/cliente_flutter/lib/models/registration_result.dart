@@ -15,7 +15,7 @@ class RegistrationResult {
     required this.message,
   });
 
-  /// Caso ideal: el backend devuelve token y la app puede seguir autenticada.
+  /// Caso ideal: el backend devuelve una sesión utilizable y la app puede seguir.
   factory RegistrationResult.authenticated(UserSession session) {
     return RegistrationResult._(
       isSuccess: true,
@@ -47,5 +47,5 @@ class RegistrationResult {
   final String? message;
 
   /// Indica si el flujo terminó con una sesión utilizable.
-  bool get isAuthenticated => session?.hasToken ?? false;
+  bool get isAuthenticated => session?.isAuthenticatedSession ?? false;
 }

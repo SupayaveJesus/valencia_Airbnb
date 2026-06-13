@@ -13,11 +13,11 @@ class PlaceDetailScreen extends StatefulWidget {
   const PlaceDetailScreen({
     super.key,
     required this.placePreview,
-    required this.filters,
+    this.filters,
   });
 
   final PlaceModel placePreview;
-  final SearchFilters filters;
+  final SearchFilters? filters;
 
   @override
   State<PlaceDetailScreen> createState() => _PlaceDetailScreenState();
@@ -134,31 +134,38 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              PrimaryButton(
-                label: 'Reservar este lugar',
-                icon: Icons.credit_card_outlined,
-                onPressed: () {
-                  final user = context.read<AuthProvider>().currentUser;
-                  if (user == null) {
-                    return;
-                  }
+              if (widget.filters != null)
+                PrimaryButton(
+                  label: 'Reservar este lugar',
+                  icon: Icons.credit_card_outlined,
+                  onPressed: () {
+                    final user = context.read<AuthProvider>().currentUser;
+                    if (user == null) {
+                      return;
+                    }
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReservationConfirmationScreen(
-                        place: place,
-                        filters: widget.filters,
-                        user: user,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReservationConfirmationScreen(
+                          place: place,
+                          filters: widget.filters!,
+                          user: user,
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                )
+              else
+                const MinimalCard(
+                  child: Text(
+                    'Abriste este detalle desde una reserva existente. Mostramos la ficha completa del lugar, pero ocultamos el botón de reservar porque este ingreso NO trae filtros de búsqueda ni fechas reutilizables para crear otra reserva consistente.',
+                  ),
+                ),
               if (snapshot.hasError) ...[
                 const SizedBox(height: 16),
                 Text(
-                  'Detalle cargado con preview local. Error real del backend: ${snapshot.error.toString().replaceFirst('Exception: ', '')}',
+                  'Seguimos mostrando el preview recibido desde resultados mientras el detalle completo falla. Error devuelto por la API: ${snapshot.error.toString().replaceFirst('Exception: ', '')}',
                 ),
               ],
             ],

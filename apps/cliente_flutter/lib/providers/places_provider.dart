@@ -24,8 +24,9 @@ class PlacesProvider extends ChangeNotifier {
   SearchFilters? get lastFilters => _lastFilters;
 
   /// Aunque el provider vive a nivel app, su contenido NO es global de negocio:
-  /// los resultados dependen de quién está autenticado. Si cambia la sesión,
-  /// vaciamos este cache visual para que la demo no mezcle usuarios.
+  /// los resultados dependen de qué cliente está identificado. La huella de
+  /// sesión se arma con la identidad disponible en login para limpiar búsquedas
+  /// previas cuando cambia la persona autenticada.
   void syncSession(UserSession? user) {
     final nextFingerprint = _buildSessionFingerprint(user);
     if (_sessionFingerprint == nextFingerprint) {
@@ -50,7 +51,16 @@ class PlacesProvider extends ChangeNotifier {
 
   Future<PlaceModel> loadPlaceDetail(int placeId) async {
     _errorMessage = null;
-    notifyListeners();
+
+    // OJO con este flujo: el detalle se abre desde una pantalla que ya entrega
+    // un preview inicial al `FutureBuilder`. Si notificamos aquí, mientras
+    // `PlaceDetailScreen.initState()` todavía está montando widgets, Flutter lo
+    // interpreta como un `markNeedsBuild()` durante build y lanza la excepción.
+    //
+    // Con API real no necesitamos repintar toda la pantalla para "arrancar" la
+    // carga: el `FutureBuilder` ya muestra el preview y luego reemplaza con el
+    // detalle cuando la respuesta llega. Por eso limpiamos el error local, pero
+    // evitamos notificar en esta fase temprana del lifecycle.
 
     try {
       return await _placesService.getPlaceById(placeId);
@@ -89,10 +99,10 @@ class PlacesProvider extends ChangeNotifier {
   }
 
   String? _buildSessionFingerprint(UserSession? user) {
-    if (user == null || !user.hasToken) {
+    if (user == null || !user.hasIdentity) {
       return null;
     }
 
-    return '${user.id}|${user.email}|${user.token}';
+    return '${user.id}|${user.email}';
   }
 }

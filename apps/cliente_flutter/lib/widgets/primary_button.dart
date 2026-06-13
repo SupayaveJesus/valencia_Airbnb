@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../config/app_theme.dart';
 
+/// Define la acción principal y su variante secundaria con el mismo feedback.
+///
+/// Centralizar loading, altura y contraste evita que cada pantalla improvise su
+/// propio botón y termine comunicando estados distintos ante llamadas reales a
+/// la API.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     super.key,

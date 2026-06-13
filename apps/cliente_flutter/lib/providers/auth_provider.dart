@@ -13,26 +13,36 @@ class AuthProvider extends ChangeNotifier {
   /// Provider = estado observable para la UI.
   ///
   /// La pantalla no toca Dio directo; solo observa loading, usuario y errores.
+  ///
+  /// En otras palabras: este provider es el dueño del estado de autenticación
+  /// dentro del árbol de widgets. Las pantallas leen getters; el provider decide
+  /// cuándo una operación empezó, terminó, falló o dejó una sesión vigente.
   UserSession? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
   String? _successMessage;
 
+  /// Getters públicos = contrato de lectura para la UI.
+  ///
+  /// La interfaz reacciona a estos valores sin conocer detalles del HTTP ni del
+  /// parseo. Así el feedback de UX queda centralizado y consistente.
   UserSession? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
-  bool get isAuthenticated => _currentUser?.hasToken ?? false;
+  bool get isAuthenticated => _currentUser?.isAuthenticatedSession ?? false;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
 
-  /// Un login solo es exitoso si termina en una sesión realmente autenticada.
+  /// Un login solo es exitoso si termina en una sesión realmente utilizable.
   ///
-  /// La validación fuerte vive en `AuthService.login()`: si el backend responde
-  /// 2xx pero omite el token, el servicio lanza una excepción y la UI muestra
-  /// el mensaje como fallo de autenticación, no como éxito parcial.
+  /// `AuthService.login()` decide si la respuesta identifica al cliente. Si la
+  /// sesión sirve, este provider publica el usuario y la app puede abrir Home.
+  /// Si no sirve, publica error para que la UI mantenga el flujo en Login.
   Future<bool> login({required String email, required String password}) async {
     _startRequest();
 
     try {
+      // La secuencia UI -> provider -> service termina acá cuando el service ya
+      // devolvió una sesión lista para que el resto de la app reaccione.
       _currentUser = await _authService.login(email: email, password: password);
       _errorMessage = null;
       _successMessage = null;
@@ -49,8 +59,8 @@ class AuthProvider extends ChangeNotifier {
   /// Ejecuta el registro y traduce el resultado técnico a estado observable.
   ///
   /// La UI necesita distinguir entre:
-  /// - éxito autenticado (entra a Home);
-  /// - éxito sin sesión (vuelve al login con mensaje pedagógico);
+  /// - éxito autenticado, para continuar dentro de la app;
+  /// - éxito sin sesión, para volver a login con mensaje claro;
   /// - error real del backend.
   Future<RegistrationResult> register({
     required String fullName,
@@ -68,6 +78,8 @@ class AuthProvider extends ChangeNotifier {
         phone: phone,
       );
 
+      // `result.session` puede ser null cuando la cuenta se creó correctamente,
+      // pero la API espera que la persona inicie sesión en el siguiente paso.
       _currentUser = result.session;
       _errorMessage = null;
       _successMessage = result.message;
@@ -83,6 +95,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void logout() {
+    // Logout limpia TODO el estado observable ligado a autenticación para que la
+    // UI y los providers dependientes vuelvan a un estado neutro y predecible.
     _currentUser = null;
     _errorMessage = null;
     _successMessage = null;
@@ -100,6 +114,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void _startRequest() {
+    // Encendemos loading y limpiamos mensajes viejos antes de hablar con la red
+    // para que la UX no mezcle feedback actual con respuestas anteriores.
     _isLoading = true;
     _errorMessage = null;
     _successMessage = null;
@@ -107,6 +123,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void _finishRequest() {
+    // El `finally` de login/register siempre termina acá, incluso con error.
+    // Eso garantiza que el spinner no quede prendido por una excepción.
     _isLoading = false;
     notifyListeners();
   }

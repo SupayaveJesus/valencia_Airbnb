@@ -1,65 +1,55 @@
-import '../config/app_environment.dart';
 import '../models/registration_result.dart';
 import '../models/user_session.dart';
 import 'api_client.dart';
-import 'mock/mock_cliente_data.dart';
 
 class AuthService {
   AuthService({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
 
   final ApiClient _apiClient;
 
+  /// Flujo real de login:
+  /// 1. prueba las rutas candidatas conocidas de la API;
+  /// 2. normaliza la respuesta a un `Map<String, dynamic>`;
+  /// 3. intenta construir una `UserSession` tolerante a distintas formas JSON;
+  /// 4. valida que exista identidad usable para que la UI sepa si abre Home.
   Future<UserSession> login({
     required String email,
     required String password,
   }) async {
-    if (AppEnvironment.useMockServices) {
-      return MockClienteData.login(email: email, password: password);
-    }
-
     final response = await _apiClient.postToCandidates(
       paths: const ['/api/users/login', '/cliente/login', '/api/cliente/login'],
       body: {'email': email.trim(), 'password': password},
     );
 
+    // `response.data` puede venir como `Map`, `Map<String, dynamic>` o en una
+    // forma no útil. Primero lo llevamos a un contrato consistente.
     final data = _normalizeMap(response.data);
     final session = UserSession.fromJson(data);
 
-    // Endurecemos el contrato del login: HTTP 200 NO alcanza por sí solo.
-    // Para que exista sesión real, el backend debe devolver un token usable.
-    // Si no lo hace, preferimos fallar con un mensaje claro antes que dejar a
-    // la UI en un falso "ingreso exitoso".
-    if (!session.hasToken) {
+    // HTTP 2xx NO alcanza por sí solo: necesitamos identidad usable del cliente
+    // (id y/o email) para afirmar que la sesión sirve. Esta regla vive en el
+    // service porque pertenece al contrato con la API, no a la pantalla.
+    if (!session.isAuthenticatedSession) {
       throw Exception(_extractLoginFailureMessage(data));
     }
 
     return session;
   }
 
-  /// Intenta registrar un cliente usando exactamente los campos confirmados
-  /// por el backend docente.
+  /// Intenta registrar un cliente usando exactamente los campos confirmados por
+  /// la API.
   ///
-  /// Punto clave del bugfix:
-  /// - si el backend devuelve token, seguimos con sesión autenticada;
-  /// - si el backend crea la cuenta pero NO devuelve token, eso sigue siendo
-  ///   un éxito funcional y NO debe transformarse en error artificial.
+  /// El resultado distingue dos casos válidos para la UX:
+  /// - cuenta creada y sesión abierta en la misma respuesta;
+  /// - cuenta creada sin sesión, para volver a login con mensaje claro.
   Future<RegistrationResult> register({
     required String fullName,
     required String email,
     required String password,
     required String phone,
   }) async {
-    if (AppEnvironment.useMockServices) {
-      return RegistrationResult.successWithoutSession(
-        message: MockClienteData.register(
-          fullName: fullName,
-          email: email,
-          password: password,
-          phone: phone,
-        ),
-      );
-    }
-
+    // El payload usa los nombres exactos que espera la API (`nombrecompleto` y
+    // `telefono`). Esta traducción pertenece al service porque es contrato HTTP.
     final payload = {
       'nombrecompleto': fullName.trim(),
       'email': email.trim(),
@@ -75,6 +65,8 @@ class AuthService {
     final data = _normalizeMap(response.data);
     final session = UserSession.fromJson(data);
 
+    // No mezclamos "cuenta creada" con "sesión abierta". Solo tratamos el
+    // registro como autenticado cuando la respuesta trae token explícito.
     if (session.hasToken) {
       return RegistrationResult.authenticated(session);
     }
@@ -85,6 +77,8 @@ class AuthService {
   }
 
   Map<String, dynamic> _normalizeMap(Object? rawData) {
+    // La capa superior quiere parsear JSON, no adivinar tipos. Este helper deja
+    // claro que el service absorbe la variabilidad de `response.data`.
     if (rawData is Map<String, dynamic>) {
       return rawData;
     }
@@ -99,7 +93,7 @@ class AuthService {
   /// Usa el mensaje del backend si aporta contexto útil.
   ///
   /// Si el servidor no envía nada claro, devolvemos una guía explícita para la
-  /// persona usuaria: la cuenta se creó y ahora debe iniciar sesión.
+  /// persona usuaria: la cuenta existe y ahora debe iniciar sesión.
   String _extractRegisterSuccessMessage(Map<String, dynamic> data) {
     final backendMessage = _readString(data['message'] ?? data['mensaje']);
 
@@ -110,8 +104,8 @@ class AuthService {
     return 'Registro exitoso, ahora iniciá sesión.';
   }
 
-  /// Cuando login responde 2xx pero sin token, el problema NO es de red:
-  /// el backend no confirmó una sesión autenticada completa.
+  /// Cuando login responde 2xx pero sin identidad usable, el problema NO es de
+  /// red: la API no confirmó qué cliente quedó autenticado.
   ///
   /// Por eso devolvemos un mensaje pedagógico y accionable para la UI.
   String _extractLoginFailureMessage(Map<String, dynamic> data) {
@@ -121,7 +115,7 @@ class AuthService {
       return '$backendMessage No se pudo abrir una sesión válida.';
     }
 
-    return 'No se pudo iniciar sesión porque el servidor no devolvió un token válido.';
+    return 'No se pudo iniciar sesión porque el servidor no devolvió un cliente identificable.';
   }
 
   String _readString(Object? value) {

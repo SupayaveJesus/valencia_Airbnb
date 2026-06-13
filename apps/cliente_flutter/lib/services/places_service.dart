@@ -1,8 +1,6 @@
-import '../config/app_environment.dart';
 import '../models/place_model.dart';
 import '../models/search_filters.dart';
 import 'api_client.dart';
-import 'mock/mock_cliente_data.dart';
 
 class PlacesService {
   PlacesService({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
@@ -10,10 +8,6 @@ class PlacesService {
   final ApiClient _apiClient;
 
   Future<List<PlaceModel>> searchPlaces(SearchFilters filters) async {
-    if (AppEnvironment.useMockServices) {
-      return MockClienteData.searchPlaces(filters);
-    }
-
     final response = await _apiClient.postResultToCandidates(
       paths: const ['/api/lugares/search', '/lugares/search'],
       body: filters.toSimplePayload(),
@@ -29,10 +23,6 @@ class PlacesService {
   }
 
   Future<List<PlaceModel>> advancedSearch(SearchFilters filters) async {
-    if (AppEnvironment.useMockServices) {
-      return MockClienteData.advancedSearch(filters);
-    }
-
     final response = await _apiClient.postResultToCandidates(
       paths: const ['/api/lugares/advancedsearch', '/lugares/advancedsearch'],
       body: filters.toAdvancedPayload(),
@@ -48,15 +38,17 @@ class PlacesService {
   }
 
   Future<PlaceModel> getPlaceById(int id) async {
-    if (AppEnvironment.useMockServices) {
-      return MockClienteData.getPlaceById(id);
-    }
-
     final response = await _apiClient.getResultToCandidates(
       paths: ['/api/lugares/$id', '/lugares/$id'],
     );
 
-    final data = _normalizeMap(response.response.data);
+    // La búsqueda ya toleraba respuestas envueltas (`data`, `lugares`, etc.).
+    // El detalle debe ser igual de resiliente porque varios backends docentes
+    // responden `{ data: {...} }` o `{ lugar: {...} }` en vez del objeto plano.
+    final data = _unwrapMap(
+      response.response.data,
+      candidateKeys: const ['data', 'lugar'],
+    );
     return PlaceModel.fromJson(data, preferredBaseUrl: response.baseUrl);
   }
 
@@ -96,5 +88,22 @@ class PlacesService {
     }
 
     return <String, dynamic>{};
+  }
+
+  Map<String, dynamic> _unwrapMap(
+    Object? rawData, {
+    List<String> candidateKeys = const [],
+  }) {
+    final map = _normalizeMap(rawData);
+
+    for (final key in candidateKeys) {
+      final candidate = map[key];
+      final unwrapped = _normalizeMap(candidate);
+      if (unwrapped.isNotEmpty) {
+        return unwrapped;
+      }
+    }
+
+    return map;
   }
 }

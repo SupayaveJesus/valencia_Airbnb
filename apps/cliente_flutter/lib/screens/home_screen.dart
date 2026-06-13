@@ -156,10 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: theme.textTheme.headlineMedium,
             ),
             const SizedBox(height: 10),
-            Text(
-              'La UI captura ciudad, fechas y huéspedes porque ese es el flujo del PDF. Luego Provider envía la búsqueda al service, el service prueba fallbacks y el modelo devuelve objetos listos para la UI.',
-              style: theme.textTheme.bodyLarge,
-            ),
+            
             const SizedBox(height: 24),
             MinimalCard(
               child: Form(
