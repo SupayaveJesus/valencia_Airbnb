@@ -42,7 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final now = DateTime.now();
     final initialDate = isCheckIn
         ? (_checkIn ?? now)
-        : (_checkOut ?? (_checkIn?.add(const Duration(days: 1)) ?? now.add(const Duration(days: 1))));
+        : (_checkOut ??
+              (_checkIn?.add(const Duration(days: 1)) ??
+                  now.add(const Duration(days: 1))));
 
     final selectedDate = await showDatePicker(
       context: context,
@@ -134,7 +136,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hola, ${authProvider.currentUser?.displayName ?? 'cliente'}'),
+        title: Text(
+          'Hola, ${authProvider.currentUser?.displayName ?? 'cliente'}',
+        ),
         actions: [
           IconButton(
             tooltip: 'Cerrar sesión',
@@ -147,12 +151,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
           children: [
-            Text('Encuentra tu próxima estadía', style: theme.textTheme.headlineMedium),
-            const SizedBox(height: 10),
             Text(
-              'La UI captura ciudad, fechas y huéspedes porque ese es el flujo del PDF. Luego Provider envía la búsqueda al service, el service prueba fallbacks y el modelo devuelve objetos listos para la UI.',
-              style: theme.textTheme.bodyLarge,
+              'Encuentra tu próxima estadía',
+              style: theme.textTheme.headlineMedium,
             ),
+            const SizedBox(height: 10),
+            
             const SizedBox(height: 24),
             MinimalCard(
               child: Form(
@@ -198,7 +202,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               if ((value ?? '').trim().isEmpty) {
                                 return 'Selecciona la salida.';
                               }
-                              if (_checkIn != null && _checkOut != null && !_checkOut!.isAfter(_checkIn!)) {
+                              if (_checkIn != null &&
+                                  _checkOut != null &&
+                                  !_checkOut!.isAfter(_checkIn!)) {
                                 return 'La salida debe ser posterior.';
                               }
                               return null;
@@ -243,7 +249,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const ReservationsScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const ReservationsScreen(),
+                          ),
                         );
                       },
                     ),
@@ -268,12 +276,14 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 32),
               Text('Últimos resultados', style: theme.textTheme.titleLarge),
               const SizedBox(height: 12),
-              ...placesProvider.results.take(2).map(
-                (place) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: PlaceCard(place: place),
-                ),
-              ),
+              ...placesProvider.results
+                  .take(2)
+                  .map(
+                    (place) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: PlaceCard(place: place),
+                    ),
+                  ),
             ],
           ],
         ),

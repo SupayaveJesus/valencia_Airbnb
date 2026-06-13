@@ -13,11 +13,11 @@ class PlaceDetailScreen extends StatefulWidget {
   const PlaceDetailScreen({
     super.key,
     required this.placePreview,
-    required this.filters,
+    this.filters,
   });
 
   final PlaceModel placePreview;
-  final SearchFilters filters;
+  final SearchFilters? filters;
 
   @override
   State<PlaceDetailScreen> createState() => _PlaceDetailScreenState();
@@ -30,7 +30,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _detailFuture = context.read<PlacesProvider>().loadPlaceDetail(widget.placePreview.id);
+    _detailFuture = context.read<PlacesProvider>().loadPlaceDetail(
+      widget.placePreview.id,
+    );
   }
 
   @override
@@ -41,7 +43,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         future: _detailFuture,
         initialData: widget.placePreview,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -51,7 +54,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
           final place = snapshot.data ?? widget.placePreview;
           final gallery = place.galleryUrls.isEmpty ? [''] : place.galleryUrls;
-          final safeIndex = _selectedPhotoIndex >= gallery.length ? 0 : _selectedPhotoIndex;
+          final safeIndex = _selectedPhotoIndex >= gallery.length
+              ? 0
+              : _selectedPhotoIndex;
 
           return ListView(
             padding: const EdgeInsets.all(24),
@@ -67,20 +72,24 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemBuilder: (context, index) {
                       return GestureDetector(
-                        onTap: () => setState(() => _selectedPhotoIndex = index),
+                        onTap: () =>
+                            setState(() => _selectedPhotoIndex = index),
                         child: Container(
                           width: 78,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: safeIndex == index ? Colors.black : const Color(0xFFE5E5E5),
+                              color: safeIndex == index
+                                  ? Colors.black
+                                  : const Color(0xFFE5E5E5),
                             ),
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: Image.network(
                             gallery[index],
                             fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported_outlined),
+                            errorBuilder: (_, _, _) =>
+                                const Icon(Icons.image_not_supported_outlined),
                           ),
                         ),
                       );
@@ -89,55 +98,74 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 ),
               ],
               const SizedBox(height: 24),
-              Text(place.name, style: Theme.of(context).textTheme.headlineMedium),
+              Text(
+                place.name,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
               const SizedBox(height: 8),
               Text(place.city, style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 16),
-              Text(place.description, style: Theme.of(context).textTheme.bodyLarge),
+              Text(
+                place.description,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
               const SizedBox(height: 24),
               MinimalCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Datos del lugar', style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      'Datos del lugar',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 16),
                     _DetailRow(label: 'Anfitrión', value: place.hostName),
                     _DetailRow(label: 'Personas', value: '${place.capacity}'),
                     _DetailRow(label: 'Camas', value: '${place.beds}'),
                     _DetailRow(label: 'Baños', value: '${place.baths}'),
                     _DetailRow(label: 'Habitaciones', value: '${place.rooms}'),
-                    _DetailRow(label: 'Wi-Fi', value: place.hasWifi ? 'Sí' : 'No'),
+                    _DetailRow(
+                      label: 'Wi-Fi',
+                      value: place.hasWifi ? 'Sí' : 'No',
+                    ),
                     _DetailRow(label: 'Parqueo', value: place.parkingLabel),
                     _DetailRow(label: 'Precio', value: place.priceLabel),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              PrimaryButton(
-                label: 'Reservar este lugar',
-                icon: Icons.credit_card_outlined,
-                onPressed: () {
-                  final user = context.read<AuthProvider>().currentUser;
-                  if (user == null) {
-                    return;
-                  }
+              if (widget.filters != null)
+                PrimaryButton(
+                  label: 'Reservar este lugar',
+                  icon: Icons.credit_card_outlined,
+                  onPressed: () {
+                    final user = context.read<AuthProvider>().currentUser;
+                    if (user == null) {
+                      return;
+                    }
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReservationConfirmationScreen(
-                        place: place,
-                        filters: widget.filters,
-                        user: user,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReservationConfirmationScreen(
+                          place: place,
+                          filters: widget.filters!,
+                          user: user,
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                )
+              else
+                const MinimalCard(
+                  child: Text(
+                    'Abriste este detalle desde una reserva existente. Mostramos la ficha completa del lugar, pero ocultamos el botón de reservar porque este ingreso NO trae filtros de búsqueda ni fechas reutilizables para crear otra reserva consistente.',
+                  ),
+                ),
               if (snapshot.hasError) ...[
                 const SizedBox(height: 16),
                 Text(
-                  'Detalle cargado con preview local. Error real del backend: ${snapshot.error.toString().replaceFirst('Exception: ', '')}',
+                  'Seguimos mostrando el preview recibido desde resultados mientras el detalle completo falla. Error devuelto por la API: ${snapshot.error.toString().replaceFirst('Exception: ', '')}',
                 ),
               ],
             ],
@@ -185,7 +213,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, color: Colors.redAccent, size: 56),
+              const Icon(
+                Icons.error_outline,
+                color: Colors.redAccent,
+                size: 56,
+              ),
               const SizedBox(height: 12),
               Text(
                 rawMessage.replaceFirst('Exception: ', ''),
@@ -196,9 +228,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 label: 'Reintentar detalle',
                 onPressed: () {
                   setState(() {
-                    _detailFuture = context.read<PlacesProvider>().loadPlaceDetail(
-                      widget.placePreview.id,
-                    );
+                    _detailFuture = context
+                        .read<PlacesProvider>()
+                        .loadPlaceDetail(widget.placePreview.id);
                   });
                 },
               ),
@@ -225,7 +257,10 @@ class _DetailRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 120,
-            child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
           Expanded(child: Text(value)),
         ],

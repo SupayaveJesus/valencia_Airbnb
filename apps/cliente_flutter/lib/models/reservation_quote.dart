@@ -1,6 +1,11 @@
 import 'place_model.dart';
 import 'search_filters.dart';
 
+/// Cotización local previa a confirmar la reserva.
+///
+/// Este objeto existe para explicitar qué importes se muestran y luego se
+/// envían a la API. La derivación vive cerca de la pantalla de confirmación
+/// porque depende del lugar elegido + filtros actuales, todavía sin persistir.
 class ReservationQuote {
   const ReservationQuote({
     required this.nights,
@@ -20,6 +25,8 @@ class ReservationQuote {
     required PlaceModel place,
     required SearchFilters filters,
   }) {
+    // Flujo de datos: filtros -> noches; lugar -> precios base; quote ->
+    // desglose visible para la persona usuaria y payload económico de la API.
     final nights = filters.nights;
     final nightsSubtotal = place.pricePerNight * nights;
     final cleaningFee = place.cleaningCost;

@@ -15,6 +15,9 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // Igual que en login, los controllers solo capturan input. El contrato con la
+  // API y el estado observable viven en provider/service, no en el widget.
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -29,13 +32,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  /// Envía el formulario y decide qué pantalla mostrar según la respuesta real.
+  ///
+  /// La UX distingue dos caminos sanos:
+  /// - si el registro ya deja sesión abierta, volvemos al inicio autenticados;
+  /// - si solo crea la cuenta, regresamos a login con el siguiente paso claro.
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.register(
+    final result = await authProvider.register(
       fullName: _nameController.text,
       email: _emailController.text,
       password: _passwordController.text,
@@ -46,15 +54,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    if (success) {
+    if (result.isAuthenticated) {
       Navigator.of(context).popUntil((route) => route.isFirst);
       return;
     }
 
+    if (result.isSuccess) {
+      // Devolvemos el mensaje a LoginScreen para que el feedback aparezca en el
+      // lugar donde la persona usuaria debe ejecutar el siguiente paso.
+      Navigator.of(context).pop(result.message);
+      return;
+    }
+
     if (authProvider.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authProvider.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(authProvider.errorMessage!)));
     }
   }
 
@@ -74,13 +89,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Crear cuenta cliente', style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 8),
                   Text(
-                    'El formulario sigue el requerimiento del PDF: nombre completo, email, contraseña y teléfono.',
-                    style: theme.textTheme.bodyMedium,
+                    'Crear cuenta cliente',
+                    style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 20),
+                  // El formulario reúne los datos visibles; el provider/service
+                  // los traduce después al contrato HTTP real de la API.
                   AppTextField(
                     label: 'Nombre completo',
                     controller: _nameController,
@@ -137,6 +152,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'Registrarme',
                     icon: Icons.how_to_reg,
                     isLoading: authProvider.isLoading,
+                    // El botón no decide la navegación por su cuenta. Dispara
+                    // `_submit()`, y el resultado del provider define el flujo.
                     onPressed: _submit,
                   ),
                 ],

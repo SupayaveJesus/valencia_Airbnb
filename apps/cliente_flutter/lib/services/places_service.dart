@@ -15,7 +15,10 @@ class PlacesService {
 
     final places = _normalizeList(response.response.data);
     return places
-        .map((item) => PlaceModel.fromJson(item, preferredBaseUrl: response.baseUrl))
+        .map(
+          (item) =>
+              PlaceModel.fromJson(item, preferredBaseUrl: response.baseUrl),
+        )
         .toList();
   }
 
@@ -27,7 +30,10 @@ class PlacesService {
 
     final places = _normalizeList(response.response.data);
     return places
-        .map((item) => PlaceModel.fromJson(item, preferredBaseUrl: response.baseUrl))
+        .map(
+          (item) =>
+              PlaceModel.fromJson(item, preferredBaseUrl: response.baseUrl),
+        )
         .toList();
   }
 
@@ -36,7 +42,13 @@ class PlacesService {
       paths: ['/api/lugares/$id', '/lugares/$id'],
     );
 
-    final data = _normalizeMap(response.response.data);
+    // La búsqueda ya toleraba respuestas envueltas (`data`, `lugares`, etc.).
+    // El detalle debe ser igual de resiliente porque varios backends docentes
+    // responden `{ data: {...} }` o `{ lugar: {...} }` en vez del objeto plano.
+    final data = _unwrapMap(
+      response.response.data,
+      candidateKeys: const ['data', 'lugar'],
+    );
     return PlaceModel.fromJson(data, preferredBaseUrl: response.baseUrl);
   }
 
@@ -76,5 +88,22 @@ class PlacesService {
     }
 
     return <String, dynamic>{};
+  }
+
+  Map<String, dynamic> _unwrapMap(
+    Object? rawData, {
+    List<String> candidateKeys = const [],
+  }) {
+    final map = _normalizeMap(rawData);
+
+    for (final key in candidateKeys) {
+      final candidate = map[key];
+      final unwrapped = _normalizeMap(candidate);
+      if (unwrapped.isNotEmpty) {
+        return unwrapped;
+      }
+    }
+
+    return map;
   }
 }

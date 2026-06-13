@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
+  // La paleta vive centralizada para que login, registro y pantallas internas
+  // compartan el mismo lenguaje visual. No son colores aislados: describen
+  // fondo, superficies, jerarquía de texto y bordes reutilizados.
   static const Color background = Color(0xFFF9F9F9);
   static const Color surface = Colors.white;
   static const Color ink = Color(0xFF1A1A1A);
@@ -10,6 +13,8 @@ class AppTheme {
   static const Color line = Color(0xFFE5E5E5);
 
   static ThemeData get lightTheme {
+    // Partimos de un ThemeData base y lo refinamos para documentar mejor qué
+    // decisiones visuales son propias de la app y cuáles siguen siendo Material.
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
@@ -21,6 +26,9 @@ class AppTheme {
     );
 
     return base.copyWith(
+      // Todo este bloque funciona como contrato visual compartido: si una
+      // pantalla usa widgets estándar, hereda el mismo feedback visual y reduce
+      // inconsistencias de UX entre flujos.
       scaffoldBackgroundColor: background,
       appBarTheme: const AppBarTheme(
         backgroundColor: background,
@@ -84,16 +92,8 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: ink,
         ),
-        bodyLarge: const TextStyle(
-          fontSize: 16,
-          height: 1.6,
-          color: ink,
-        ),
-        bodyMedium: const TextStyle(
-          fontSize: 14,
-          height: 1.6,
-          color: mutedInk,
-        ),
+        bodyLarge: const TextStyle(fontSize: 16, height: 1.6, color: ink),
+        bodyMedium: const TextStyle(fontSize: 14, height: 1.6, color: mutedInk),
         labelLarge: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w600,

@@ -5,6 +5,7 @@ import '../providers/places_provider.dart';
 import '../widgets/minimal_card.dart';
 import '../widgets/place_card.dart';
 import '../widgets/primary_button.dart';
+import 'map_results_screen.dart';
 import 'place_detail_screen.dart';
 
 class SearchResultsScreen extends StatelessWidget {
@@ -25,10 +26,13 @@ class SearchResultsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Resultados para $city', style: theme.textTheme.headlineMedium),
+              Text(
+                'Resultados para $city',
+                style: theme.textTheme.headlineMedium,
+              ),
               const SizedBox(height: 8),
               Text(
-                'Si la API falla, la pantalla muestra el error real devuelto por los intentos a cada endpoint. No hay datos demo.',
+                'Esta pantalla muestra exactamente lo que devolvió la búsqueda anterior. Si la API responde con error, el mensaje también se conserva para explicar por qué no hubo resultados renderizables.',
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
@@ -37,9 +41,15 @@ class SearchResultsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Error de búsqueda', style: theme.textTheme.titleLarge),
+                      Text(
+                        'Error de búsqueda',
+                        style: theme.textTheme.titleLarge,
+                      ),
                       const SizedBox(height: 8),
-                      Text(provider.errorMessage!, style: theme.textTheme.bodyMedium),
+                      Text(
+                        provider.errorMessage!,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -53,7 +63,10 @@ class SearchResultsScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Sin resultados', style: theme.textTheme.titleLarge),
+                          Text(
+                            'Sin resultados',
+                            style: theme.textTheme.titleLarge,
+                          ),
                           const SizedBox(height: 8),
                           Text(
                             provider.errorMessage ??
@@ -67,23 +80,18 @@ class SearchResultsScreen extends StatelessWidget {
                 )
               else ...[
                 PrimaryButton(
-                  label: 'Vista de mapa: frontera preparada',
+                  label: 'Vista de mapa',
                   icon: Icons.map_outlined,
                   isSecondary: true,
                   onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text('Mapa no incluido en esta entrega'),
-                        content: const Text(
-                          'Se priorizó cerrar el flujo real login → búsqueda → detalle → reserva → reservas sin meter una dependencia de mapas a último momento.',
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MapResultsScreen(
+                          results: provider.results,
+                          cityLabel: city,
+                          filters: filters,
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Entendido'),
-                          ),
-                        ],
                       ),
                     );
                   },

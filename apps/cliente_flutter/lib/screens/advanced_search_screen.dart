@@ -39,7 +39,9 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
     _bedsController = TextEditingController(text: filters.beds.toString());
     _bathsController = TextEditingController(text: filters.baths.toString());
     _roomsController = TextEditingController(text: filters.rooms.toString());
-    _parkingController = TextEditingController(text: filters.parkingSpots.toString());
+    _parkingController = TextEditingController(
+      text: filters.parkingSpots.toString(),
+    );
     _priceController = TextEditingController(
       text: filters.maxPricePerNight == 0
           ? ''
@@ -102,10 +104,13 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
-            Text('Filtra con más detalle', style: theme.textTheme.headlineMedium),
+            Text(
+              'Filtra con más detalle',
+              style: theme.textTheme.headlineMedium,
+            ),
             const SizedBox(height: 8),
             Text(
-              'El PDF pide ampliar los campos del lugar. Aquí mantenemos ese formulario y lo traducimos al shape real de Postman.',
+              'Aquí ampliamos la búsqueda sin cambiar la idea del ejercicio: el formulario captura filtros legibles para la persona y luego se traduce al body real que consume la API.',
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
@@ -130,25 +135,55 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
-                    _buildNumberField('Huéspedes', _guestsController, Icons.people_outline),
+                    _buildNumberField(
+                      'Huéspedes',
+                      _guestsController,
+                      Icons.people_outline,
+                    ),
                     const SizedBox(height: 16),
-                    _buildNumberField('Camas', _bedsController, Icons.bed_outlined),
+                    _buildNumberField(
+                      'Camas',
+                      _bedsController,
+                      Icons.bed_outlined,
+                    ),
                     const SizedBox(height: 16),
-                    _buildNumberField('Baños', _bathsController, Icons.bathtub_outlined),
+                    _buildNumberField(
+                      'Baños',
+                      _bathsController,
+                      Icons.bathtub_outlined,
+                    ),
                     const SizedBox(height: 16),
-                    _buildNumberField('Habitaciones', _roomsController, Icons.meeting_room_outlined),
+                    _buildNumberField(
+                      'Habitaciones',
+                      _roomsController,
+                      Icons.meeting_room_outlined,
+                    ),
                     const SizedBox(height: 16),
-                    _buildNumberField('Parqueos', _parkingController, Icons.local_parking_outlined),
+                    _buildNumberField(
+                      'Parqueos',
+                      _parkingController,
+                      Icons.local_parking_outlined,
+                    ),
                     const SizedBox(height: 16),
-                    _buildNumberField('Precio máximo por noche', _priceController, Icons.attach_money_outlined),
+                    _buildNumberField(
+                      'Precio máximo por noche',
+                      _priceController,
+                      Icons.attach_money_outlined,
+                    ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<bool?>(
                       initialValue: _hasWifi,
                       decoration: const InputDecoration(labelText: 'Wi-Fi'),
                       items: const [
-                        DropdownMenuItem<bool?>(value: null, child: Text('No filtrar')),
+                        DropdownMenuItem<bool?>(
+                          value: null,
+                          child: Text('No filtrar'),
+                        ),
                         DropdownMenuItem<bool?>(value: true, child: Text('Sí')),
-                        DropdownMenuItem<bool?>(value: false, child: Text('No')),
+                        DropdownMenuItem<bool?>(
+                          value: false,
+                          child: Text('No'),
+                        ),
                       ],
                       onChanged: (value) => setState(() => _hasWifi = value),
                     ),

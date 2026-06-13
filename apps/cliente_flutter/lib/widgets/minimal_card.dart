@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../config/app_theme.dart';
 
+/// Envuelve contenido con la superficie visual común de la app.
+///
+/// Así cualquier bloque informativo mantiene el mismo borde, radio y padding,
+/// incluso cuando la información proviene de pantallas distintas o de respuestas
+/// reales del backend.
 class MinimalCard extends StatelessWidget {
   const MinimalCard({
     super.key,
