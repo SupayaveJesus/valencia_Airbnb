@@ -30,11 +30,6 @@ class SearchResultsScreen extends StatelessWidget {
                 'Resultados para $city',
                 style: theme.textTheme.headlineMedium,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Esta pantalla muestra exactamente lo que devolvió la búsqueda anterior. Si la API responde con error, el mensaje también se conserva para explicar por qué no hubo resultados renderizables.',
-                style: theme.textTheme.bodyMedium,
-              ),
               const SizedBox(height: 16),
               if (provider.errorMessage != null) ...[
                 MinimalCard(
@@ -70,7 +65,7 @@ class SearchResultsScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           Text(
                             provider.errorMessage ??
-                                'No encontramos lugares para $city con el contrato disponible.',
+                                'No encontramos lugares para $city.',
                             style: theme.textTheme.bodyLarge,
                           ),
                         ],

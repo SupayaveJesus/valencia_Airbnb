@@ -1,19 +1,9 @@
 class AppEnvironment {
   AppEnvironment._();
 
-  /// Configuración compartida del cliente Flutter.
-  ///
-  /// Este módulo concentra decisiones de infraestructura que deben ser únicas
-  /// para toda la app, como hosts candidatos, rutas base y timeouts. La idea es
-  /// que todos los services hablen con la misma API real bajo la misma política.
-
-  /// Orden de prioridad exigido para resolver el backend.
-  ///
-  /// Esta lista responde una pregunta arquitectónica, no visual: "¿qué host
-  /// intentamos primero cuando cualquier feature necesita la API?".
-  ///
-  /// La prioridad se define acá para que AuthService, PlacesService y compañía
-  /// reutilicen la misma resolución y no terminen consultando entornos distintos.
+/// Lista de hosts base para el backend. El orden refleja la prioridad de uso:
+  /// - El primero es el que se recomienda usar en producción.
+  /// - Los siguientes son alternativas para desarrollo local o despliegues temporales.
   static const List<String> baseUrls = [
     'http://67.205.172.167',
     'https://airbnbmob2.site',

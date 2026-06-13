@@ -32,10 +32,6 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
   @override
   void initState() {
     super.initState();
-    // Mapa y lista deben salir de la misma búsqueda para que la persona no vea
-    // dos respuestas distintas según la vista elegida. Solo filtramos lugares
-    // con coordenadas inválidas porque el mapa necesita latitud/longitud
-    // utilizables para dibujar marcadores coherentes.
     _placesWithCoordinates = widget.results
         .where(_hasValidCoordinates)
         .toList(growable: false);
@@ -81,8 +77,8 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                 if (_placesWithCoordinates.length != widget.results.length) ...[
                   MinimalCard(
                     child: Text(
-                      'Mostramos ${_placesWithCoordinates.length} marcadores. '
-                      '${widget.results.length - _placesWithCoordinates.length} resultado(s) quedaron solo en la lista porque no traían coordenadas válidas.',
+                      'Mostramos ${_placesWithCoordinates.length} marcador(es). '
+                      '${widget.results.length - _placesWithCoordinates.length} resultado(s) no aparecen en el mapa.',
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -171,14 +167,14 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
 
   String _buildSummaryMessage() {
     if (widget.results.isEmpty) {
-      return 'No hay resultados para proyectar en el mapa todavía.';
+      return 'No hay resultados para mostrar en el mapa.';
     }
 
     if (_placesWithCoordinates.isEmpty) {
-      return 'La búsqueda sí devolvió lugares, pero ninguno incluyó coordenadas útiles para ubicarlo en el mapa.';
+      return 'No encontramos ubicaciones disponibles.';
     }
 
-    return 'La lista y el mapa salen del mismo conjunto de resultados. Toca un marcador para ver qué lugar representa.';
+    return 'Toca un marcador para ver el lugar.';
   }
 
   Widget _buildEmptyState(ThemeData theme) {
@@ -191,7 +187,7 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
             Text('Sin resultados', style: theme.textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
-              'Cuando la búsqueda devuelva alojamientos, esta vista reutilizará esos mismos datos para pintar los marcadores.',
+              'Cuando haya resultados, aparecerán aquí.',
               style: theme.textTheme.bodyLarge,
             ),
           ],
@@ -213,7 +209,7 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'La lista sigue siendo útil, pero el mapa necesita latitud y longitud reales para cada lugar.',
+              'Estos resultados no tienen ubicación disponible.',
               style: theme.textTheme.bodyLarge,
             ),
             const SizedBox(height: 16),
@@ -296,7 +292,7 @@ class _SelectedPlaceCard extends StatelessWidget {
             Text('Marcador no seleccionado', style: theme.textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
-              'Toca cualquier marcador para sincronizar visualmente mapa y resultado seleccionado.',
+              'Toca un marcador para ver más información.',
               style: theme.textTheme.bodyMedium,
             ),
           ],

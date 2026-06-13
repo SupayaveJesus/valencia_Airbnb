@@ -108,11 +108,6 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
               'Filtra con más detalle',
               style: theme.textTheme.headlineMedium,
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Aquí ampliamos la búsqueda sin cambiar la idea del ejercicio: el formulario captura filtros legibles para la persona y luego se traduce al body real que consume la API.',
-              style: theme.textTheme.bodyMedium,
-            ),
             const SizedBox(height: 24),
             MinimalCard(
               child: Form(

@@ -16,8 +16,6 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Igual que en login, los controllers solo capturan input. El contrato con la
-  // API y el estado observable viven en provider/service, no en el widget.
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -32,11 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  /// Envía el formulario y decide qué pantalla mostrar según la respuesta real.
-  ///
-  /// La UX distingue dos caminos sanos:
-  /// - si el registro ya deja sesión abierta, volvemos al inicio autenticados;
-  /// - si solo crea la cuenta, regresamos a login con el siguiente paso claro.
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -60,8 +53,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     if (result.isSuccess) {
-      // Devolvemos el mensaje a LoginScreen para que el feedback aparezca en el
-      // lugar donde la persona usuaria debe ejecutar el siguiente paso.
       Navigator.of(context).pop(result.message);
       return;
     }
@@ -94,8 +85,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 20),
-                  // El formulario reúne los datos visibles; el provider/service
-                  // los traduce después al contrato HTTP real de la API.
                   AppTextField(
                     label: 'Nombre completo',
                     controller: _nameController,
@@ -152,8 +141,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'Registrarme',
                     icon: Icons.how_to_reg,
                     isLoading: authProvider.isLoading,
-                    // El botón no decide la navegación por su cuenta. Dispara
-                    // `_submit()`, y el resultado del provider define el flujo.
                     onPressed: _submit,
                   ),
                 ],

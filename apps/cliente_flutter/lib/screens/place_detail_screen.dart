@@ -159,13 +159,13 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               else
                 const MinimalCard(
                   child: Text(
-                    'Abriste este detalle desde una reserva existente. Mostramos la ficha completa del lugar, pero ocultamos el botón de reservar porque este ingreso NO trae filtros de búsqueda ni fechas reutilizables para crear otra reserva consistente.',
+                    'Reserva no disponible desde esta vista.',
                   ),
                 ),
               if (snapshot.hasError) ...[
                 const SizedBox(height: 16),
                 Text(
-                  'Seguimos mostrando el preview recibido desde resultados mientras el detalle completo falla. Error devuelto por la API: ${snapshot.error.toString().replaceFirst('Exception: ', '')}',
+                  'No pudimos actualizar el detalle. ${snapshot.error.toString().replaceFirst('Exception: ', '')}',
                 ),
               ],
             ],
