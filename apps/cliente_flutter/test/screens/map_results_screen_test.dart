@@ -42,6 +42,9 @@ void main() {
       // búsqueda sí trae coordenadas que sirven para renderizar marcadores.
       expect(find.text('Vista de lista'), findsOneWidget);
       expect(find.text('Departamento Equipetrol'), findsOneWidget);
+      expect(find.text('2 huéspedes'), findsOneWidget);
+      expect(find.text('Parqueo para 1 vehículo'), findsOneWidget);
+      expect(find.text('Bs. 30.00 / noche'), findsOneWidget);
       expect(
         find.text('Map data © OpenStreetMap contributors'),
         findsOneWidget,

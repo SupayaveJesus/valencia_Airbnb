@@ -6,6 +6,7 @@ import '../config/app_theme.dart';
 import '../models/place_model.dart';
 import '../models/search_filters.dart';
 import '../widgets/minimal_card.dart';
+import '../widgets/place_card.dart';
 import '../widgets/primary_button.dart';
 import 'place_detail_screen.dart';
 
@@ -87,10 +88,10 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                 Expanded(
                   child: Column(
                     children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: FlutterMap(
+                       Expanded(
+                         child: ClipRRect(
+                           borderRadius: BorderRadius.circular(24),
+                           child: FlutterMap(
                             options: MapOptions(
                               initialCenter: _selectedPlace == null
                                   ? const LatLng(-17.7833, -63.1821)
@@ -145,9 +146,13 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _SelectedPlaceCard(
-                        place: _selectedPlace,
-                        filters: widget.filters,
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: _SelectedPlaceCard(
+                            place: _selectedPlace,
+                            filters: widget.filters,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -282,9 +287,9 @@ class _SelectedPlaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     if (place == null) {
+      final theme = Theme.of(context);
+
       return MinimalCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,68 +305,28 @@ class _SelectedPlaceCard extends StatelessWidget {
       );
     }
 
-    return MinimalCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(place!.name, style: theme.textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text(place!.city, style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 12),
-          Text(
-            place!.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _InfoTag(label: place!.capacityLabel),
-              _InfoTag(label: '${place!.beds} camas'),
-              _InfoTag(label: place!.priceLabel),
-            ],
-          ),
-          if (filters != null) ...[
-            const SizedBox(height: 16),
-            PrimaryButton(
-              label: 'Ver detalle del lugar',
-              icon: Icons.arrow_forward_outlined,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PlaceDetailScreen(
-                      placePreview: place!,
-                      filters: filters!,
-                    ),
+    return Column(
+      children: [
+        PlaceCard(place: place!),
+        if (filters != null) ...[
+          const SizedBox(height: 16),
+          PrimaryButton(
+            label: 'Ver detalle del lugar',
+            icon: Icons.arrow_forward_outlined,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlaceDetailScreen(
+                    placePreview: place!,
+                    filters: filters!,
                   ),
-                );
-              },
-            ),
-          ],
+                ),
+              );
+            },
+          ),
         ],
-      ),
-    );
-  }
-}
-
-class _InfoTag extends StatelessWidget {
-  const _InfoTag({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F3F3),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+      ],
     );
   }
 }

@@ -20,6 +20,8 @@ class AdvancedSearchScreen extends StatefulWidget {
 class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _cityController;
+  late final TextEditingController _checkInController;
+  late final TextEditingController _checkOutController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _guestsController;
   late final TextEditingController _bedsController;
@@ -27,6 +29,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
   late final TextEditingController _roomsController;
   late final TextEditingController _parkingController;
   late final TextEditingController _priceController;
+  late DateTime _checkIn;
+  late DateTime _checkOut;
   bool? _hasWifi;
 
   @override
@@ -34,6 +38,10 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
     super.initState();
     final filters = widget.initialFilters;
     _cityController = TextEditingController(text: filters.city);
+    _checkIn = filters.checkIn;
+    _checkOut = filters.checkOut;
+    _checkInController = TextEditingController(text: _formatDate(_checkIn));
+    _checkOutController = TextEditingController(text: _formatDate(_checkOut));
     _descriptionController = TextEditingController(text: filters.description);
     _guestsController = TextEditingController(text: filters.guests.toString());
     _bedsController = TextEditingController(text: filters.beds.toString());
@@ -53,6 +61,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
   @override
   void dispose() {
     _cityController.dispose();
+    _checkInController.dispose();
+    _checkOutController.dispose();
     _descriptionController.dispose();
     _guestsController.dispose();
     _bedsController.dispose();
@@ -70,6 +80,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
 
     final filters = widget.initialFilters.copyWith(
       city: _cityController.text.trim(),
+      checkIn: _checkIn,
+      checkOut: _checkOut,
       description: _descriptionController.text.trim(),
       guests: int.tryParse(_guestsController.text.trim()) ?? 1,
       beds: int.tryParse(_bedsController.text.trim()) ?? 0,
@@ -93,6 +105,50 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
     );
   }
 
+  Future<void> _pickDate({required bool isCheckIn}) async {
+    final now = DateUtils.dateOnly(DateTime.now());
+    final firstDate = isCheckIn ? now : _checkIn;
+    final currentValue = isCheckIn ? _checkIn : _checkOut;
+    final fallbackDate = isCheckIn
+        ? now
+        : _checkIn.add(const Duration(days: 1));
+    final initialDate = currentValue.isBefore(firstDate)
+        ? fallbackDate
+        : currentValue;
+
+    final selectedDate = await showDatePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: DateTime(now.year + 2),
+      initialDate: initialDate,
+    );
+
+    if (selectedDate == null) {
+      return;
+    }
+
+    setState(() {
+      if (isCheckIn) {
+        _checkIn = selectedDate;
+        _checkInController.text = _formatDate(selectedDate);
+
+        if (!_checkOut.isAfter(selectedDate)) {
+          _checkOut = selectedDate.add(const Duration(days: 1));
+          _checkOutController.text = _formatDate(_checkOut);
+        }
+      } else {
+        _checkOut = selectedDate;
+        _checkOutController.text = _formatDate(selectedDate);
+      }
+    });
+  }
+
+  String _formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    return '$day/$month/${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PlacesProvider>();
@@ -105,7 +161,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
           padding: const EdgeInsets.all(24),
           children: [
             Text(
-              'Filtra con más detalle',
+              'Completá tu búsqueda',
               style: theme.textTheme.headlineMedium,
             ),
             const SizedBox(height: 24),
@@ -123,17 +179,69 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                           : null,
                     ),
                     const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppTextField(
+                            label: 'Llegada',
+                            controller: _checkInController,
+                            icon: Icons.calendar_today_outlined,
+                            readOnly: true,
+                            onTap: () => _pickDate(isCheckIn: true),
+                            validator: (value) => (value ?? '').trim().isEmpty
+                                ? 'Selecciona la llegada.'
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppTextField(
+                            label: 'Salida',
+                            controller: _checkOutController,
+                            icon: Icons.calendar_month_outlined,
+                            readOnly: true,
+                            onTap: () => _pickDate(isCheckIn: false),
+                            validator: (value) {
+                              if ((value ?? '').trim().isEmpty) {
+                                return 'Selecciona la salida.';
+                              }
+                              if (!_checkOut.isAfter(_checkIn)) {
+                                return 'La salida debe ser posterior.';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      label: 'Huéspedes',
+                      controller: _guestsController,
+                      icon: Icons.people_outline,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        final guests = int.tryParse((value ?? '').trim());
+                        if (guests == null || guests <= 0) {
+                          return 'Ingresa una cantidad válida.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
                     AppTextField(
                       label: 'Descripción opcional',
                       controller: _descriptionController,
                       icon: Icons.notes_outlined,
                       maxLines: 3,
                     ),
-                    const SizedBox(height: 16),
-                    _buildNumberField(
-                      'Huéspedes',
-                      _guestsController,
-                      Icons.people_outline,
+                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Filtros avanzados',
+                        style: theme.textTheme.titleLarge,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     _buildNumberField(
@@ -184,7 +292,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
                     ),
                     const SizedBox(height: 24),
                     PrimaryButton(
-                      label: 'Buscar con filtros avanzados',
+                      label: 'Buscar lugares',
                       icon: Icons.tune,
                       isLoading: provider.isLoading,
                       onPressed: _submit,

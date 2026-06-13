@@ -74,47 +74,53 @@ class SearchResultsScreen extends StatelessWidget {
                   ),
                 )
               else ...[
-                PrimaryButton(
-                  label: 'Vista de mapa',
-                  icon: Icons.map_outlined,
-                  isSecondary: true,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => MapResultsScreen(
-                          results: provider.results,
-                          cityLabel: city,
-                          filters: filters,
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView.separated(
+                          itemCount: provider.results.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 16),
+                          itemBuilder: (context, index) {
+                            final place = provider.results[index];
+                            return PlaceCard(
+                              place: place,
+                              onTap: filters == null
+                                  ? null
+                                  : () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => PlaceDetailScreen(
+                                            placePreview: place,
+                                            filters: filters,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                            );
+                          },
                         ),
                       ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: provider.results.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-                      final place = provider.results[index];
-                      return PlaceCard(
-                        place: place,
-                        onTap: filters == null
-                            ? null
-                            : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => PlaceDetailScreen(
-                                      placePreview: place,
-                                      filters: filters,
-                                    ),
-                                  ),
-                                );
-                              },
-                      );
-                    },
+                      const SizedBox(height: 16),
+                      PrimaryButton(
+                        label: 'Vista de mapa',
+                        icon: Icons.map_outlined,
+                        isSecondary: true,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MapResultsScreen(
+                                results: provider.results,
+                                cityLabel: city,
+                                filters: filters,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ],
