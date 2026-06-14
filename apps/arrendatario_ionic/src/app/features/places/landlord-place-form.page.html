@@ -1,0 +1,352 @@
+<ion-content class="place-form-page va-shell-page">
+  <section class="place-form-layout va-frame">
+    <ion-card class="place-form-card">
+      <ion-card-content>
+        <div class="place-form-head">
+          <div>
+            <p class="card-kicker va-kicker">
+              {{ mode() === 'create' ? 'Nuevo lugar' : 'Editar publicación' }}
+            </p>
+
+            <p class="card-title">{{ pageTitle() }}</p>
+
+            <p class="card-subtitle va-copy">
+              {{ formSubtitle() }}
+            </p>
+          </div>
+
+          <div class="head-aside va-panel va-panel--inset">
+            <span>Flujo</span>
+            <strong>{{ flowLabel() }}</strong>
+            <p>
+              {{
+                mode() === 'create'
+                  ? 'Las imágenes se suben después de crear el lugar.'
+                  : 'Desde esta misma vista podés corregir datos y abrir las reservas del lugar.'
+              }}
+            </p>
+          </div>
+        </div>
+
+        @if (loadingPlace()) {
+          <div class="state-box va-panel">
+            <ion-spinner name="crescent"></ion-spinner>
+            <p>Cargando datos del lugar...</p>
+          </div>
+        } @else if (loadErrorMessage()) {
+          <div class="state-box va-panel">
+            <ion-text color="danger">
+              <p>{{ loadErrorMessage() }}</p>
+            </ion-text>
+
+            <div class="actions-row actions-row--start">
+              <ion-button fill="outline" (click)="goBack()">Volver</ion-button>
+              <ion-button (click)="retryLoadPlace()">Reintentar carga</ion-button>
+            </div>
+          </div>
+        } @else {
+          <form [formGroup]="form" (ngSubmit)="submit()" class="place-form">
+            <section class="form-section va-panel">
+              <div class="section-head">
+                <p class="section-title">Identidad del lugar</p>
+                <p class="section-copy">Definí nombre, descripción y galería del lugar.</p>
+              </div>
+
+              <div class="section-body">
+                <div class="photo-field va-panel va-panel--inset">
+                  <label for="place-photos" class="photo-label">Fotos del lugar</label>
+
+                  <input
+                    id="place-photos"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    (change)="onPhotosSelected($event)"
+                  />
+
+                  <ion-note color="medium">
+                    {{
+                      mode() === 'create'
+                        ? 'Para publicar se exige al menos 1 foto. '
+                        : 'Si el lugar ya tiene fotos guardadas, no hace falta volver a subirlas. '
+                    }}
+                    Seleccionadas ahora: {{ selectedPhotos().length }} foto(s).
+                  </ion-note>
+
+                  @if (existingPhotoUrls().length > 0) {
+                    <div class="existing-photos">
+                      <p class="existing-photos__title">Fotos ya guardadas</p>
+
+                      <div class="existing-photos__grid">
+                        @for (photoUrl of existingPhotoUrls(); track photoUrl) {
+                          <img [src]="photoUrl" alt="Foto actual del lugar" />
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (selectedPhotos().length > 0) {
+                    <ul class="photo-list">
+                      @for (photo of selectedPhotos(); track photo.name + photo.size) {
+                        <li>{{ photo.name }}</li>
+                      }
+                    </ul>
+                  }
+                </div>
+
+                <div class="field-block">
+                  <label class="field-label" for="place-name">Nombre</label>
+
+                  <ion-item class="va-field" lines="none">
+                    <ion-input
+                      id="place-name"
+                      formControlName="name"
+                      placeholder="Ej: Departamento céntrico">
+                    </ion-input>
+                  </ion-item>
+                </div>
+
+                <div class="field-block">
+                  <label class="field-label" for="place-description">Descripción</label>
+
+                  <ion-item class="va-field va-field--textarea" lines="none">
+                    <ion-textarea
+                      id="place-description"
+                      formControlName="description"
+                      autoGrow="true"
+                      placeholder="Describe brevemente el lugar">
+                    </ion-textarea>
+                  </ion-item>
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section va-panel">
+              <div class="section-head">
+                <p class="section-title">Capacidad y servicios</p>
+                <p class="section-copy">Ordená la información física del alojamiento.</p>
+              </div>
+
+              <div class="section-body">
+                <div class="grid-two">
+                  <div class="field-block">
+                    <label class="field-label" for="place-guests">Cantidad de personas</label>
+
+                    <ion-item class="va-field" lines="none">
+                      <ion-input
+                        id="place-guests"
+                        type="number"
+                        formControlName="guests"
+                        placeholder="Ej: 4">
+                      </ion-input>
+                    </ion-item>
+                  </div>
+
+                  <div class="field-block">
+                    <label class="field-label" for="place-beds">Camas</label>
+
+                    <ion-item class="va-field" lines="none">
+                      <ion-input
+                        id="place-beds"
+                        type="number"
+                        formControlName="beds"
+                        placeholder="Ej: 3">
+                      </ion-input>
+                    </ion-item>
+                  </div>
+
+                  <div class="field-block">
+                    <label class="field-label" for="place-bathrooms">Baños</label>
+
+                    <ion-item class="va-field" lines="none">
+                      <ion-input
+                        id="place-bathrooms"
+                        type="number"
+                        formControlName="bathrooms"
+                        placeholder="Ej: 2">
+                      </ion-input>
+                    </ion-item>
+                  </div>
+
+                  <div class="field-block">
+                    <label class="field-label" for="place-rooms">Habitaciones</label>
+
+                    <ion-item class="va-field" lines="none">
+                      <ion-input
+                        id="place-rooms"
+                        type="number"
+                        formControlName="rooms"
+                        placeholder="Ej: 2">
+                      </ion-input>
+                    </ion-item>
+                  </div>
+                </div>
+
+                <div class="toggle-blocks">
+                  <label class="toggle-card">
+                    <span>Wifi disponible</span>
+                    <input type="checkbox" formControlName="hasWifi" />
+                  </label>
+
+                  <label class="toggle-card">
+                    <span>Tiene parqueo</span>
+                    <input
+                      type="checkbox"
+                      formControlName="hasParking"
+                      (change)="onParkingChanged($event)"
+                    />
+                  </label>
+                </div>
+
+                <div class="field-block">
+                  <label class="field-label" for="place-parking-slots">
+                    Cantidad de vehículos en parqueo
+                  </label>
+
+                  <ion-item class="va-field" lines="none">
+                    <ion-input
+                      id="place-parking-slots"
+                      type="number"
+                      formControlName="parkingSlots"
+                      placeholder="Ej: 1">
+                    </ion-input>
+                  </ion-item>
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section va-panel">
+              <div class="section-head">
+                <p class="section-title">Precio y ubicación</p>
+                <p class="section-copy">Completá la referencia económica y geográfica.</p>
+              </div>
+
+              <div class="section-body">
+                <div class="grid-two">
+                  <div class="field-block">
+                    <label class="field-label" for="place-price">Precio por noche</label>
+
+                    <ion-item class="va-field" lines="none">
+                      <ion-input
+                        id="place-price"
+                        type="number"
+                        formControlName="pricePerNight"
+                        placeholder="Ej: 80">
+                      </ion-input>
+                    </ion-item>
+                  </div>
+
+                  <div class="field-block">
+                    <label class="field-label" for="place-cleaning">Costo de limpieza</label>
+
+                    <ion-item class="va-field" lines="none">
+                      <ion-input
+                        id="place-cleaning"
+                        type="number"
+                        formControlName="cleaningCost"
+                        placeholder="Ej: 10">
+                      </ion-input>
+                    </ion-item>
+                  </div>
+                </div>
+
+                <div class="field-block">
+                  <label class="field-label" for="place-city">Ciudad</label>
+
+                  <ion-item class="va-field" lines="none">
+                    <ion-input
+                      id="place-city"
+                      formControlName="city"
+                      placeholder="Ej: Santa Cruz">
+                    </ion-input>
+                  </ion-item>
+                </div>
+
+                <div class="grid-two">
+                  <div class="field-block">
+                    <label class="field-label" for="place-latitude">Latitud</label>
+
+                    <ion-item class="va-field" lines="none">
+                      <ion-input
+                        id="place-latitude"
+                        type="number"
+                        formControlName="latitude"
+                        placeholder="Ej: -17.7828703">
+                      </ion-input>
+                    </ion-item>
+                  </div>
+
+                  <div class="field-block">
+                    <label class="field-label" for="place-longitude">Longitud</label>
+
+                    <ion-item class="va-field" lines="none">
+                      <ion-input
+                        id="place-longitude"
+                        type="number"
+                        formControlName="longitude"
+                        placeholder="Ej: -63.180618">
+                      </ion-input>
+                    </ion-item>
+                  </div>
+                </div>
+
+                <div class="map-box va-panel va-panel--inset">
+                  <p class="map-title">Ubicación en mapa</p>
+                  <p class="map-copy">
+                    Abrí el mapa solo cuando necesités ajustar el pin. Mientras tanto podés cargar los
+                    datos manuales con una edición más liviana en móvil.
+                  </p>
+
+                  @if (hasSelectedCoordinates()) {
+                    <p class="map-coordinates">
+                      Coordenadas actuales: {{ currentLatitude() }} / {{ currentLongitude() }}
+                    </p>
+                  }
+
+                  <ion-button
+                    type="button"
+                    fill="outline"
+                    size="small"
+                    class="map-toggle-button"
+                    (click)="toggleLocationPicker()">
+                    {{ locationPickerToggleLabel() }}
+                  </ion-button>
+
+                  @if (showLocationPicker()) {
+                    <app-place-location-picker
+                      [latitude]="currentLatitude()"
+                      [longitude]="currentLongitude()"
+                      (coordinatesChange)="onMapCoordinatesChanged($event)">
+                    </app-place-location-picker>
+                  }
+                </div>
+              </div>
+            </section>
+
+            @if (submitErrorMessage()) {
+              <ion-text color="danger" class="va-feedback">
+                <p class="feedback">{{ submitErrorMessage() }}</p>
+              </ion-text>
+            }
+
+            <div class="actions-row">
+              <ion-button type="button" fill="outline" (click)="goBack()">
+                Cancelar
+              </ion-button>
+
+              @if (mode() === 'edit') {
+                <ion-button type="button" fill="outline" (click)="goToReservations()">
+                  Ver reservas
+                </ion-button>
+              }
+
+              <ion-button type="submit" [disabled]="saving()">
+                {{ submitButtonLabel() }}
+              </ion-button>
+            </div>
+          </form>
+        }
+      </ion-card-content>
+    </ion-card>
+  </section>
+</ion-content>

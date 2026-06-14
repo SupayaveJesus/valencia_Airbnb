@@ -1,0 +1,150 @@
+.reservations-page {
+  --background: var(--va-background);
+}
+
+.reservations-layout {
+  max-width: 880px;
+}
+
+.reservations-card ion-card-content {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+}
+
+.reservations-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.card-kicker {
+  margin-bottom: 6px;
+}
+
+.card-title {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', Inter, sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.card-subtitle {
+  margin: 0;
+  color: var(--va-muted);
+}
+
+.reservation-state,
+.reservations-placeholder {
+  box-shadow: none;
+}
+
+.reservation-state {
+  display: grid;
+  gap: 4px;
+  min-width: 140px;
+  padding: 16px;
+}
+
+.reservation-state span {
+  color: var(--va-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.reservation-state strong {
+  font-family: 'Plus Jakarta Sans', Inter, sans-serif;
+  font-size: 1.05rem;
+}
+
+.reservations-placeholder {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+}
+
+.placeholder-title {
+  margin: 0;
+  color: var(--va-ink);
+  font-weight: 700;
+}
+
+.placeholder-copy {
+  margin: 0;
+  color: var(--va-ink-soft);
+  line-height: 1.6;
+}
+
+.reservations-list {
+  display: grid;
+  gap: 16px;
+  margin: 8px 0 4px;
+}
+
+.reservation-item {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: 16px;
+  align-items: start;
+  padding: 16px;
+}
+
+.reservation-photo {
+  width: 96px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.reservation-info {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.reservation-meta {
+  display: grid;
+  gap: 6px;
+}
+
+.reservation-meta strong {
+  color: var(--va-ink);
+}
+
+.reservation-total {
+  align-self: stretch;
+  align-content: center;
+}
+
+@media (max-width: 767px) {
+  .reservations-card ion-card-content {
+    padding: 20px 16px;
+  }
+
+  .reservations-head {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-state {
+    min-width: 0;
+  }
+
+  .reservation-item {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .reservation-photo {
+    width: 100%;
+    height: 160px;
+  }
+
+  .reservation-total {
+    width: 100%;
+  }
+}

@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+@import '@ionic/angular/css/palettes/dark.system.css';
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+ion-app,
+ion-content {
+  font-family: Inter, 'Segoe UI', sans-serif;
+}
+
+body,
+ion-app,
+.ion-page {
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ion-title,
+.va-heading {
+  font-family: 'Plus Jakarta Sans', Inter, 'Segoe UI', sans-serif;
+}
+
+body {
+  background: var(--va-background);
+  color: var(--va-ink);
+}
+
+ion-button {
+  --border-radius: var(--va-radius-sm);
+  --box-shadow: none;
+  --padding-start: 18px;
+  --padding-end: 18px;
+  min-height: 48px;
+  max-width: 100%;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-transform: none;
+}
+
+ion-card {
+  margin: 0;
+  border: 1px solid var(--va-line);
+  border-radius: var(--va-radius-lg);
+  box-shadow: var(--va-shadow-soft);
+  background: var(--va-surface);
+}
+
+ion-item {
+  --background: transparent;
+  --border-color: transparent;
+  --highlight-color-focused: var(--va-accent);
+  --highlight-color-invalid: #b66e63;
+  --highlight-color-valid: var(--va-accent);
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --inner-border-width: 0;
+}
+
+ion-input,
+ion-textarea {
+  --color: var(--va-ink);
+  --placeholder-color: var(--va-muted);
+}
+
+a {
+  color: var(--va-accent-strong);
+}
+
+.va-page {
+  --background: var(--va-background);
+}
+
+.va-shell-page {
+  --background: linear-gradient(180deg, #ffffff 0, var(--va-background) 180px);
+}
+
+ion-content.va-shell-page::part(scroll) {
+  overflow-x: hidden;
+}
+
+.va-frame {
+  max-width: 1120px;
+  margin: 0 auto;
+  width: min(100%, 1120px);
+  padding: 24px 24px 40px;
+  overflow-x: clip;
+}
+
+.va-kicker {
+  margin: 0;
+  color: var(--va-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.va-copy {
+  margin: 0;
+  color: var(--va-muted);
+  line-height: 1.6;
+}
+
+.va-panel {
+  border: 1px solid var(--va-line);
+  border-radius: var(--va-radius-lg);
+  background: var(--va-surface);
+  box-shadow: var(--va-shadow-soft);
+}
+
+.va-panel--inset {
+  border-radius: var(--va-radius-md);
+  background: var(--va-surface-strong);
+  box-shadow: none;
+}
+
+.va-field {
+  --background: var(--va-surface);
+  --border-radius: var(--va-radius-sm);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-top: 10px;
+  --inner-padding-bottom: 10px;
+  --min-height: 58px;
+  border: 1px solid var(--va-line);
+  border-radius: var(--va-radius-sm);
+}
+
+.va-field.ion-focused {
+  border-color: var(--va-accent);
+  box-shadow: inset 0 0 0 1px rgba(58, 77, 63, 0.12);
+}
+
+.va-field ion-label,
+.auth-field ion-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--va-ink-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.va-field ion-input,
+.va-field ion-textarea {
+  --padding-top: 0;
+  --padding-bottom: 0;
+  font-size: 0.96rem;
+}
+
+.va-field ion-textarea {
+  min-height: 110px;
+}
+
+.va-chip {
+  padding: 10px 14px;
+  border: 1px solid var(--va-line);
+  border-radius: 999px;
+  background: var(--va-surface);
+  color: var(--va-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.va-feedback {
+  padding: 14px 16px;
+  border: 1px solid #e4c7c2;
+  border-radius: var(--va-radius-sm);
+  background: var(--va-danger-soft);
+}
+
+@media (max-width: 767px) {
+  .va-frame {
+    width: 100%;
+    padding: 16px 16px 28px;
+  }
+
+  ion-button {
+    width: auto;
+    min-height: 44px;
+  }
+}

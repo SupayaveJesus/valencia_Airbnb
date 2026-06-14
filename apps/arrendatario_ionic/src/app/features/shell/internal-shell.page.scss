@@ -1,0 +1,135 @@
+.shell-header ion-toolbar {
+  --background: rgba(255, 255, 255, 0.96);
+  --border-color: transparent;
+  --color: var(--va-ink);
+  --min-height: 64px;
+  border-bottom: 1px solid var(--va-line);
+  backdrop-filter: blur(10px);
+}
+
+.shell-toolbar {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 10px 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.shell-brand {
+  display: flex;
+  align-items: center;
+}
+
+.shell-eyebrow {
+  margin-bottom: 2px;
+}
+
+.shell-brand ion-title {
+  padding: 0;
+  text-align: left;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.shell-copy {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+}
+
+.shell-title {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--va-muted);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.shell-subtitle {
+  margin: 0;
+  color: var(--va-ink-soft);
+  font-size: 0.86rem;
+}
+
+.shell-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.shell-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--va-line);
+  border-radius: 999px;
+  background: var(--va-surface-strong);
+}
+
+.shell-nav a {
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: var(--va-muted);
+  text-decoration: none;
+  font-weight: 600;
+  min-width: 84px;
+  text-align: center;
+  font-size: 0.86rem;
+}
+
+.shell-nav .is-active {
+  background: var(--va-surface);
+  color: var(--va-accent-strong);
+}
+
+.shell-toolbar ion-button {
+  --color: var(--va-ink-soft);
+  --padding-start: 0;
+  --padding-end: 0;
+  margin: 0;
+  min-height: auto;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 768px) {
+  .shell-toolbar {
+    padding: 10px 16px;
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .shell-copy {
+    gap: 1px;
+  }
+
+  .shell-actions {
+    width: 100%;
+    display: grid;
+    gap: 8px;
+  }
+
+  .shell-nav {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-radius: 18px;
+  }
+
+  .shell-nav a {
+    min-width: 0;
+    border-radius: 14px;
+  }
+
+  .shell-logout {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

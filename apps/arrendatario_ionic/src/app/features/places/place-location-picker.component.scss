@@ -1,0 +1,35 @@
+.picker-shell {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.picker-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.picker-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.picker-text {
+  margin: 0;
+  color: var(--va-muted);
+  line-height: 1.5;
+}
+
+.picker-map {
+  width: 100%;
+  min-height: 320px;
+  border: 1px solid var(--va-line);
+  border-radius: var(--va-radius-md);
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .picker-map {
+    min-height: 280px;
+  }
+}
