@@ -7,7 +7,6 @@ import '../widgets/minimal_card.dart';
 import '../widgets/primary_button.dart';
 import 'register_screen.dart';
 
-/// Pantalla de autenticación del cliente.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -18,8 +17,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Los controllers son el puente entre formulario y provider. La pantalla
-  // captura texto; la decisión de autenticación vive fuera de la UI.
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -35,9 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Flujo completo del submit:
-    // formulario valida -> provider coordina estado -> service consulta la API
-    // -> vuelve una sesión usable o un error -> la UI reacciona al resultado.
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.login(
       email: _emailController.text,
@@ -53,10 +47,6 @@ class _LoginScreenState extends State<LoginScreen> {
     ).showSnackBar(SnackBar(content: Text(authProvider.errorMessage!)));
   }
 
-  /// Abre registro y escucha si vuelve con un mensaje para este contexto.
-  ///
-  /// Así Login puede explicar el siguiente paso cuando la cuenta se crea bien,
-  /// pero la API espera un inicio de sesión explícito después del registro.
   Future<void> _goToRegister() async {
     final registrationMessage = await Navigator.push<String?>(
       context,
@@ -89,9 +79,6 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 32),
               Text('StayHub', style: theme.textTheme.headlineLarge),
               const SizedBox(height: 32),
-              // `watch()` reconstruye la pantalla cuando cambia el estado de auth.
-              // Por eso loading, errores y navegación responden al provider sin
-              // duplicar estado local para cada request.
               MinimalCard(
                 child: Form(
                   key: _formKey,

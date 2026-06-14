@@ -1,0 +1,36 @@
+// For information on how to create your own theme, please refer to:
+// https://ionicframework.com/docs/theming/
+
+:root {
+  --va-background: #f9f9f9;
+  --va-surface: #ffffff;
+  --va-surface-strong: #f3f4f3;
+  --va-surface-contrast: #eceeed;
+  --va-ink: #1a1a1a;
+  --va-ink-soft: #4e5450;
+  --va-muted: #6f7471;
+  --va-line: #e5e5e5;
+  --va-line-strong: #dadada;
+  --va-accent: #3a4d3f;
+  --va-accent-strong: #243229;
+  --va-accent-soft: #edf1ee;
+  --va-success-soft: #eff4f0;
+  --va-danger-soft: #f7efee;
+  --va-radius-sm: 16px;
+  --va-radius-md: 20px;
+  --va-radius-lg: 24px;
+  --va-shadow-soft: 0 1px 2px rgba(26, 26, 26, 0.04);
+
+  --ion-background-color: var(--va-background);
+  --ion-text-color: var(--va-ink);
+  --ion-color-primary: var(--va-accent);
+  --ion-color-primary-rgb: 58, 77, 63;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #334438;
+  --ion-color-primary-tint: #4e5f52;
+  --ion-color-medium: var(--va-muted);
+  --ion-color-medium-rgb: 111, 116, 113;
+  --ion-color-step-150: #f1f1f1;
+  --ion-color-step-600: #767676;
+}

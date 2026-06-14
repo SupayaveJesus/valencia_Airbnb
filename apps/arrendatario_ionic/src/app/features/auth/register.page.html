@@ -1,0 +1,62 @@
+<ion-content class="auth-page va-page">
+  <section class="auth-layout">
+    <div class="auth-copy auth-copy--brand">
+      <p class="eyebrow va-kicker">Valencia Airbnb</p>
+      <h1>Alta de cuenta.</h1>
+      <p class="lead va-copy">Completá los datos mínimos para entrar al panel.</p>
+    </div>
+
+    <ion-card class="auth-card">
+      <ion-card-content>
+        <p class="card-kicker va-kicker">Alta arrendatario</p>
+        <p class="card-title">Registro</p>
+        <p class="card-subtitle va-copy">Creá tu acceso.</p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+          <div class="auth-field-group">
+            <label class="auth-field-label" for="register-full-name">Nombre completo</label>
+            <ion-item lines="none" class="auth-field va-field">
+              <ion-input id="register-full-name" formControlName="fullName" autocomplete="name" placeholder="Como figura en tu cuenta"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="auth-field-group">
+            <label class="auth-field-label" for="register-email">Correo</label>
+            <ion-item lines="none" class="auth-field va-field">
+              <ion-input id="register-email" type="email" formControlName="email" autocomplete="email" placeholder="ejemplo@correo.com"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="auth-field-group">
+            <label class="auth-field-label" for="register-phone">Teléfono</label>
+            <ion-item lines="none" class="auth-field va-field">
+              <ion-input id="register-phone" type="tel" formControlName="phone" autocomplete="tel" placeholder="Solo números de contacto"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="auth-field-group">
+            <label class="auth-field-label" for="register-password">Contraseña</label>
+            <ion-item lines="none" class="auth-field va-field">
+              <ion-input id="register-password" type="password" formControlName="password" autocomplete="new-password" placeholder="Usá al menos 4 caracteres"></ion-input>
+            </ion-item>
+          </div>
+
+          @if (errorMessage()) {
+            <ion-text color="danger" class="feedback-card va-feedback">
+              <p class="feedback">{{ errorMessage() }}</p>
+            </ion-text>
+          }
+
+          <ion-button expand="block" type="submit" [disabled]="loading()" class="auth-submit">
+            {{ loading() ? 'Creando cuenta...' : 'Crear cuenta' }}
+          </ion-button>
+        </form>
+
+        <p class="switch-link">
+          ¿Ya tenés cuenta?
+          <a routerLink="/login">Volver al login</a>
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </section>
+</ion-content>

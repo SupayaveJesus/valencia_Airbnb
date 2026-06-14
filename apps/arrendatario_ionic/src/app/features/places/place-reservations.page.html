@@ -1,0 +1,76 @@
+<ion-content class="reservations-page va-shell-page">
+  <section class="reservations-layout va-frame">
+    <ion-card class="reservations-card">
+      <ion-card-content>
+        <div class="reservations-head">
+          <div>
+            <p class="card-kicker va-kicker">Reservas</p>
+            <p class="card-title">{{ placeName }}</p>
+            <p class="card-subtitle">Lugar #{{ placeId }}</p>
+          </div>
+
+          <div class="reservation-state va-panel va-panel--inset">
+            <span>Total</span>
+            <strong>{{ reservations().length }}</strong>
+          </div>
+        </div>
+
+        @if (loading()) {
+          <div class="reservations-placeholder va-panel va-panel--inset">
+            <ion-spinner name="crescent"></ion-spinner>
+            <p>Cargando reservas...</p>
+          </div>
+        } @else if (errorMessage()) {
+          <div class="reservations-placeholder va-panel va-panel--inset">
+            <ion-text color="danger">
+              <p>{{ errorMessage() }}</p>
+            </ion-text>
+
+            <ion-button fill="outline" (click)="loadReservations()">
+              Reintentar
+            </ion-button>
+          </div>
+        } @else if (reservations().length === 0) {
+          <div class="reservations-placeholder va-panel va-panel--inset">
+            <p class="placeholder-title">Aún no hay reservas registradas para este lugar.</p>
+            <p class="placeholder-copy">Cuando se confirme una reserva, la vas a ver listada acá.</p>
+          </div>
+        } @else {
+          <div class="reservations-list">
+            @for (reservation of reservations(); track reservation.id) {
+              <article class="reservation-item va-panel va-panel--inset">
+                @if (reservation.imageUrl) {
+                  <ion-img
+                    class="reservation-photo"
+                    [src]="reservation.imageUrl"
+                    alt="Foto del lugar">
+                  </ion-img>
+                }
+
+                <div class="reservation-info">
+                  <p class="placeholder-title">Reserva #{{ reservation.id }}</p>
+
+                  <div class="reservation-meta">
+                    <p class="placeholder-copy"><strong>Cliente:</strong> {{ reservation.clienteNombre }}</p>
+                    <p class="placeholder-copy"><strong>Noches:</strong> {{ reservation.nochesLabel }}</p>
+                    <p class="placeholder-copy"><strong>Llegada:</strong> {{ reservation.fechaInicio }}</p>
+                    <p class="placeholder-copy"><strong>Salida:</strong> {{ reservation.fechaFin }}</p>
+                  </div>
+                </div>
+
+                <div class="reservation-state reservation-total va-panel va-panel--inset">
+                  <span>Total</span>
+                  <strong>{{ reservation.totalLabel }}</strong>
+                </div>
+              </article>
+            }
+          </div>
+        }
+
+        <ion-button fill="outline" (click)="goBack()">
+          Volver a mis lugares
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </section>
+</ion-content>

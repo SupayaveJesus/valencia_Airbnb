@@ -1,0 +1,30 @@
+<ion-header class="shell-header">
+  <ion-toolbar>
+    <div class="shell-toolbar">
+      <div class="shell-brand">
+        <div>
+          <p class="shell-eyebrow va-kicker">Valencia Airbnb</p>
+          <ion-title>Panel arrendatario</ion-title>
+        </div>
+      </div>
+
+      <div class="shell-copy">
+        <p class="shell-title">Mis lugares</p>
+        <p class="shell-subtitle">{{ welcomeMessage() }}</p>
+      </div>
+
+      <div class="shell-actions">
+        <nav class="shell-nav" aria-label="Navegación principal del panel arrendatario">
+          <a routerLink="/app/lugares" routerLinkActive="is-active">Listado</a>
+          <a routerLink="/app/lugares/nuevo" routerLinkActive="is-active">Nuevo lugar</a>
+        </nav>
+
+        <ion-button class="shell-logout" fill="clear" (click)="logout()">Salir</ion-button>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="va-shell-page">
+  <router-outlet></router-outlet>
+</ion-content>

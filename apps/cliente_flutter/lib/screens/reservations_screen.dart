@@ -9,11 +9,6 @@ import '../widgets/minimal_card.dart';
 import '../widgets/primary_button.dart';
 import 'place_detail_screen.dart';
 
-/// Historial de reservas del cliente autenticado.
-///
-/// Esta pantalla enseña el resultado final del bloque 3: consume el estado del
-/// provider, pide el historial real al backend y permite saltar desde una
-/// reserva ya creada hacia el detalle actualizado del alojamiento asociado.
 class ReservationsScreen extends StatefulWidget {
   const ReservationsScreen({super.key});
 
@@ -22,16 +17,16 @@ class ReservationsScreen extends StatefulWidget {
 }
 
 class _ReservationsScreenState extends State<ReservationsScreen> {
+  // Este flag separa la primera carga completa de los refresh posteriores para
+  // poder mostrar un loader inicial claro sin parpadeos extraños.
   bool _showInitialLoader = true;
 
   @override
   void initState() {
     super.initState();
 
-    // IMPORTANTE: diferimos la primera carga al primer frame para evitar que
-    // el provider haga notifyListeners() mientras Flutter todavía construye
-    // esta pantalla. Así la vista arranca estable antes de pedir el historial
-    // real de reservas del cliente autenticado.
+    // Se difiere la carga al primer frame porque initState todavía no es buen
+    // lugar para disparar lógica que depende de un contexto totalmente montado.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) {
         return;
@@ -50,9 +45,10 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   }
 
   Future<void> _loadReservations() async {
+    // La API de reservas necesita un usuario con identificador persistido; si
+    // esa base no existe, abortamos antes de golpear el backend inútilmente.
     final user = context.read<AuthProvider>().currentUser;
     if (user == null || !user.hasIdentifier) {
-      // Sin id de cliente NO existe endpoint de historial que podamos consultar.
       return;
     }
 
@@ -64,9 +60,6 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   }
 
   void _openPlaceDetail(ReservationModel reservation) {
-    // La navegación no reconstruye toda la búsqueda original. Parte de la
-    // reserva creada, arma una preview suficiente y deja que el detalle complete
-    // el resto consultando la API si hace falta.
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -77,27 +70,23 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
   }
 
   PlaceModel _buildPlacePreview(ReservationModel reservation) {
+    // La reserva trae datos anidados del lugar en formatos variables; armamos
+    // un preview mínimo y seguro para poder abrir la pantalla de detalle.
     final placeData = _extractMapOrFirstItem(reservation.rawData['lugar']);
 
-    // `rawData` guarda el payload original precisamente para este puente de
-    // navegación: reutilizamos lo que ya vino con la reserva y completamos con
-    // fallbacks legibles si algún campo no llegó en el listado.
     return PlaceModel.fromJson({
       ...placeData,
       'id': reservation.placeId,
       'nombre': reservation.placeName,
       'foto': reservation.placeImageUrl,
-      'descripcion':
-          placeData['descripcion'] ??
-          'Abrí el detalle desde una reserva ya creada, así que esta tarjeta actúa como preview mientras consultamos el lugar completo en la API.',
+      'descripcion': placeData['descripcion'] ?? 'Ver detalle del alojamiento.',
       'ciudad': placeData['ciudad'] ?? 'Ciudad no informada',
     });
   }
 
   Map<String, dynamic> _extractMapOrFirstItem(Object? value) {
-    // Igual que en el modelo, la relación `lugar` puede venir como lista o mapa.
-    // Resolverlo acá evita romper la navegación al detalle por variaciones del
-    // backend en un campo que conceptualmente representa un solo alojamiento.
+    // Algunos endpoints devuelven "lugar" como objeto y otros como lista con un
+    // solo elemento; este helper normaliza ambos casos.
     if (value is List && value.isNotEmpty) {
       return _extractMapOrFirstItem(value.first);
     }
@@ -115,8 +104,6 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
 
   Widget _buildReservationImage(String imageUrl) {
     if (imageUrl.isEmpty) {
-      // Placeholder honesto: preferimos explicar ausencia de imagen antes que
-      // dejar un hueco visual que parezca error silencioso.
       return Container(
         height: 180,
         color: const Color(0xFFF1F1F1),
@@ -125,8 +112,6 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
       );
     }
 
-    // Esta preview NO es un adorno: le confirma a la persona usuaria que la
-    // reserva y el detalle apuntan al mismo alojamiento antes de abrir la ficha.
     return Image.network(
       imageUrl,
       height: 180,
@@ -159,14 +144,12 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
             }
 
             if (!user.hasIdentifier) {
-              // Caso pedagógico importante: la sesión puede existir pero sin id.
-              // En ese escenario el problema NO es visual, es contractual.
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: MinimalCard(
                     child: const Text(
-                      'La API no devolvió un id de cliente en la sesión. Sin ese dato NO se puede consultar /reservas/cliente/{id}.',
+                      'No pudimos cargar tus reservas.',
                     ),
                   ),
                 ),
@@ -175,16 +158,11 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
 
             if (_showInitialLoader ||
                 (provider.isLoading && provider.reservations.isEmpty)) {
-              // Loader inicial solo mientras todavía no existe historial para
-              // mostrar. Si luego hay recarga con datos presentes, priorizamos
-              // conservar la lista visible en vez de tapar toda la pantalla.
               return const Center(child: CircularProgressIndicator());
             }
 
             if (provider.errorMessage != null &&
                 provider.reservations.isEmpty) {
-              // Error de primera carga: como no hay contenido previo útil, la UI
-              // se enfoca en explicar el fallo y ofrecer reintento explícito.
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -215,8 +193,6 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
             }
 
             if (provider.reservations.isEmpty) {
-              // Estado vacío guiado: además de decir "no hay datos", explica qué
-              // acción debe hacer la persona para poblar este historial.
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -233,11 +209,6 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                         Text(
                           'Todavía no tienes reservas registradas.',
                           style: Theme.of(context).textTheme.titleMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Vuelve a la pantalla anterior, busca un alojamiento y confirma tu primera reserva. Cuando la API la cree, este historial la mostrará en cuanto regreses.',
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
@@ -260,8 +231,8 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
               itemBuilder: (context, index) {
                 final reservation = provider.reservations[index];
 
-                // Cada tarjeta resume la reserva y a la vez funciona como puerta
-                // de entrada al detalle del lugar asociado.
+                // Cada card funciona como acceso rápido al detalle del lugar que
+                // originó la reserva, útil para defender trazabilidad del flujo.
                 return Material(
                   color: Colors.transparent,
                   child: InkWell(
@@ -309,9 +280,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                                     Icon(Icons.open_in_new_outlined, size: 18),
                                     SizedBox(width: 8),
                                     Expanded(
-                                      child: Text(
-                                        'Tocá la tarjeta para revisar el detalle actualizado del lugar.',
-                                      ),
+                                      child: Text('Toca para ver el detalle.'),
                                     ),
                                   ],
                                 ),

@@ -20,6 +20,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // Estos controllers mantienen sincronizados los campos visibles con el estado
+  // real del formulario para poder validar y reutilizar los datos al navegar.
   final _formKey = GlobalKey<FormState>();
   final _cityController = TextEditingController();
   final _guestsController = TextEditingController(text: '1');
@@ -31,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    // Toda pantalla que crea controllers debe liberarlos para evitar fugas de
+    // memoria cuando el usuario sale de esta vista.
     _cityController.dispose();
     _guestsController.dispose();
     _checkInController.dispose();
@@ -39,6 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _pickDate({required bool isCheckIn}) async {
+    // La fecha inicial cambia según el campo tocado: llegada usa la fecha ya
+    // elegida o hoy; salida intenta arrancar un día después del check-in.
     final now = DateTime.now();
     final initialDate = isCheckIn
         ? (_checkIn ?? now)
@@ -59,6 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       if (isCheckIn) {
+        // Si el usuario mueve la llegada hacia adelante, invalidamos una salida
+        // anterior o igual para no dejar un rango inconsistente.
         _checkIn = selectedDate;
         _checkInController.text = _formatDate(selectedDate);
 
@@ -80,6 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   SearchFilters? _buildFilters() {
+    // Este método concentra la validación para que la búsqueda simple y la
+    // avanzada salgan desde la misma base de datos temporal del formulario.
     if (!_formKey.currentState!.validate()) {
       return null;
     }
@@ -93,6 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _submitSearch({String? suggestedCity}) async {
+    // Las búsquedas rápidas reutilizan exactamente el mismo flujo que el botón
+    // principal; solo precargan la ciudad antes de construir los filtros.
     if (suggestedCity != null) {
       _cityController.text = suggestedCity;
     }
@@ -105,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await context.read<PlacesProvider>().searchSimple(filters);
 
     if (!mounted) {
+      // Evita navegar si la pantalla ya fue destruida mientras esperaba la API.
       return;
     }
 
@@ -115,6 +128,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openAdvancedSearch() {
+    // La pantalla avanzada recibe los filtros actuales para que el usuario no
+    // pierda lo que ya escribió en el formulario principal.
     final filters = _buildFilters();
     if (filters == null) {
       return;
@@ -156,13 +171,14 @@ class _HomeScreenState extends State<HomeScreen> {
               style: theme.textTheme.headlineMedium,
             ),
             const SizedBox(height: 10),
-            
+
             const SizedBox(height: 24),
             MinimalCard(
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
+                    // Bloque 1: filtros mínimos para disparar una búsqueda útil.
                     AppTextField(
                       label: 'Ciudad',
                       hint: 'Santa Cruz',
@@ -228,6 +244,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                     const SizedBox(height: 24),
+                    // Bloque 2: acciones que derivan a resultados o refinan la
+                    // búsqueda sin duplicar lógica de validación.
                     PrimaryButton(
                       label: 'Buscar lugares',
                       icon: Icons.search,
@@ -260,6 +278,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            // Bloque 3: accesos rápidos para la defensa; muestran cómo se puede
+            // reutilizar el mismo submit desde distintos puntos de entrada.
             Text('Búsquedas rápidas', style: theme.textTheme.titleLarge),
             const SizedBox(height: 12),
             Wrap(
@@ -273,6 +293,8 @@ class _HomeScreenState extends State<HomeScreen> {
               }).toList(),
             ),
             if (placesProvider.results.isNotEmpty) ...[
+              // Si ya hubo una búsqueda, dejamos una vista previa para no volver
+              // al usuario a una pantalla vacía al regresar desde resultados.
               const SizedBox(height: 32),
               Text('Últimos resultados', style: theme.textTheme.titleLarge),
               const SizedBox(height: 12),

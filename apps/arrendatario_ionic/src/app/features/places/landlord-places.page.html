@@ -1,0 +1,106 @@
+<ion-content class="places-page va-shell-page">
+  <section class="places-layout va-frame">
+    <ion-card class="places-hero">
+      <ion-card-content>
+        <div class="places-hero__copy">
+          <div>
+            <p class="section-kicker va-kicker">Inventario</p>
+            <p class="section-title">Un listado estructurado para revisar publicaciones sin distracciones.</p>
+          </div>
+
+          <p class="section-copy va-copy">
+            Ciudad, capacidad, tarifa y descripción quedan ordenadas como un panel móvil de administración.
+          </p>
+        </div>
+
+        <div class="places-hero__meta">
+          <div class="hero-stat">
+            <span>Total</span>
+            <strong>{{ places().length }}</strong>
+          </div>
+
+          <ion-button size="small" (click)="goToCreatePlace()">Publicar lugar</ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    @if (noticeMessage()) {
+      <ion-card class="notice-card">
+        <ion-card-content>
+          <ion-note color="primary">{{ noticeMessage() }}</ion-note>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if (loading()) {
+      <div class="state-box va-panel">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Cargando lugares...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="state-box va-panel">
+        <ion-text color="danger">
+          <p>{{ errorMessage() }}</p>
+        </ion-text>
+        <ion-button (click)="reload()">Reintentar</ion-button>
+      </div>
+    } @else if (places().length === 0) {
+      <div class="state-box va-panel">
+        <p>Todavía no publicaste ningún lugar.</p>
+        <ion-button (click)="goToCreatePlace()">Crear mi primer lugar</ion-button>
+      </div>
+    } @else {
+      <ion-list inset="false" class="places-list">
+          <div class="places-list__header va-panel">
+            <span>Propiedad</span>
+            <span>Resumen</span>
+            <span>Acción</span>
+        </div>
+
+        @for (place of places(); track place.id) {
+          <article class="place-row va-panel">
+            <div class="place-photo">
+              @if (hasPhoto(place)) {
+                <img class="place-photo__image" [src]="place.imageUrl" [alt]="'Foto principal de ' + place.name" />
+              } @else {
+                <div class="place-photo__placeholder" aria-label="Lugar sin foto">
+                  <span>{{ photoFallbackInitials(place) }}</span>
+                  <small class="place-photo__hint">Sin foto</small>
+                </div>
+              }
+            </div>
+
+            <div class="place-row__body">
+              <div class="place-row__top">
+                <div>
+                  <p class="place-row__eyebrow">{{ place.city }}</p>
+                  <h2>{{ place.name }}</h2>
+                </div>
+                <span class="place-row__id">#{{ place.id }}</span>
+              </div>
+
+              <p class="place-row__description">{{ place.description }}</p>
+
+              <div class="place-row__meta">
+                <span>{{ place.guestsLabel }}</span>
+                <span>{{ place.priceLabel }}</span>
+              </div>
+            </div>
+
+            <div class="place-row__actions">
+              <span class="place-row__action-label">Acciones disponibles</span>
+              <div class="place-row__buttons">
+                <ion-button fill="outline" (click)="goToReservations(place)">
+                  Ver reservas
+                </ion-button>
+                <ion-button (click)="goToEditPlace(place)">
+                  Editar lugar
+                </ion-button>
+              </div>
+            </div>
+          </article>
+        }
+      </ion-list>
+    }
+  </section>
+</ion-content>

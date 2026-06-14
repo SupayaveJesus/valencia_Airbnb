@@ -1,0 +1,60 @@
+<ion-content class="auth-page va-page">
+  <section class="auth-layout">
+    <div class="auth-copy auth-copy--brand">
+      <p class="eyebrow va-kicker">Valencia Airbnb</p>
+      <h1>Acceso al panel.</h1>
+      <p class="lead va-copy">Entrá para gestionar lugares y reservas.</p>
+    </div>
+
+    <ion-card class="auth-card">
+      <ion-card-content>
+        <p class="card-kicker va-kicker">Acceso arrendatario</p>
+        <p class="card-title">Iniciar sesión</p>
+        <p class="card-subtitle va-copy">Usá tu cuenta activa.</p>
+
+        <ion-note color="medium" class="card-note">{{ noticeMessage() }}</ion-note>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+          <div class="auth-field-group">
+            <label class="auth-field-label" for="login-email">Correo</label>
+            <ion-item lines="none" class="auth-field va-field">
+              <ion-input id="login-email" type="email" formControlName="email" autocomplete="email" placeholder="ejemplo@correo.com"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="auth-field-group">
+            <label class="auth-field-label" for="login-password">Contraseña</label>
+            <ion-item lines="none" class="auth-field va-field">
+              <ion-input id="login-password" type="password" formControlName="password" autocomplete="current-password" placeholder="Ingresá tu contraseña"></ion-input>
+            </ion-item>
+          </div>
+
+          @if (errorMessage()) {
+            <div class="feedback-card va-feedback" [class.feedback-card--network]="errorTone() === 'network'">
+              <ion-text color="danger">
+                <p class="feedback-title">No se pudo ingresar</p>
+                <p class="feedback">{{ errorMessage() }}</p>
+              </ion-text>
+
+              @if (errorDetail()) {
+                <details class="technical-details">
+                  <summary>Ver detalle técnico</summary>
+                  <pre>{{ errorDetail() }}</pre>
+                </details>
+              }
+            </div>
+          }
+
+          <ion-button expand="block" type="submit" [disabled]="loading()" class="auth-submit">
+            {{ loading() ? 'Ingresando...' : 'Entrar' }}
+          </ion-button>
+        </form>
+
+        <p class="switch-link">
+          ¿No tenés cuenta?
+          <a routerLink="/register">Registrarme</a>
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </section>
+</ion-content>

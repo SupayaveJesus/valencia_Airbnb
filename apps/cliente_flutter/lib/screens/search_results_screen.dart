@@ -13,6 +13,8 @@ class SearchResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Esta pantalla no consulta sola: solo representa el estado que el provider
+    // dejó listo después de la búsqueda simple o avanzada.
     final provider = context.watch<PlacesProvider>();
     final theme = Theme.of(context);
     final filters = provider.lastFilters;
@@ -30,13 +32,10 @@ class SearchResultsScreen extends StatelessWidget {
                 'Resultados para $city',
                 style: theme.textTheme.headlineMedium,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Esta pantalla muestra exactamente lo que devolvió la búsqueda anterior. Si la API responde con error, el mensaje también se conserva para explicar por qué no hubo resultados renderizables.',
-                style: theme.textTheme.bodyMedium,
-              ),
               const SizedBox(height: 16),
               if (provider.errorMessage != null) ...[
+                // Si hubo error pero la navegación llegó igual, lo mostramos
+                // arriba para que el usuario entienda por qué no hay resultados.
                 MinimalCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +69,7 @@ class SearchResultsScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           Text(
                             provider.errorMessage ??
-                                'No encontramos lugares para $city con el contrato disponible.',
+                                'No encontramos lugares para $city.',
                             style: theme.textTheme.bodyLarge,
                           ),
                         ],
@@ -79,47 +78,57 @@ class SearchResultsScreen extends StatelessWidget {
                   ),
                 )
               else ...[
-                PrimaryButton(
-                  label: 'Vista de mapa',
-                  icon: Icons.map_outlined,
-                  isSecondary: true,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => MapResultsScreen(
-                          results: provider.results,
-                          cityLabel: city,
-                          filters: filters,
+                // Con resultados, cada tarjeta puede abrir el detalle usando los
+                // filtros originales para habilitar la reserva posterior.
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView.separated(
+                          itemCount: provider.results.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 16),
+                          itemBuilder: (context, index) {
+                            final place = provider.results[index];
+                            return PlaceCard(
+                              place: place,
+                              onTap: filters == null
+                                  ? null
+                                  : () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => PlaceDetailScreen(
+                                            placePreview: place,
+                                            filters: filters,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                            );
+                          },
                         ),
                       ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: provider.results.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-                      final place = provider.results[index];
-                      return PlaceCard(
-                        place: place,
-                        onTap: filters == null
-                            ? null
-                            : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => PlaceDetailScreen(
-                                      placePreview: place,
-                                      filters: filters,
-                                    ),
-                                  ),
-                                );
-                              },
-                      );
-                    },
+                      const SizedBox(height: 16),
+                      PrimaryButton(
+                        label: 'Vista de mapa',
+                        icon: Icons.map_outlined,
+                        isSecondary: true,
+                        // La vista de mapa reutiliza la misma lista recibida; no
+                        // dispara otra consulta ni altera el estado del provider.
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MapResultsScreen(
+                                results: provider.results,
+                                cityLabel: city,
+                                filters: filters,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ],

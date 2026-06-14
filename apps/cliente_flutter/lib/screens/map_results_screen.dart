@@ -6,6 +6,7 @@ import '../config/app_theme.dart';
 import '../models/place_model.dart';
 import '../models/search_filters.dart';
 import '../widgets/minimal_card.dart';
+import '../widgets/place_card.dart';
 import '../widgets/primary_button.dart';
 import 'place_detail_screen.dart';
 
@@ -26,16 +27,16 @@ class MapResultsScreen extends StatefulWidget {
 }
 
 class _MapResultsScreenState extends State<MapResultsScreen> {
+  // El mapa solo trabaja con resultados que tienen coordenadas válidas; el resto
+  // sigue existiendo en la lista, pero no puede convertirse en marcador.
   late final List<PlaceModel> _placesWithCoordinates;
   PlaceModel? _selectedPlace;
 
   @override
   void initState() {
     super.initState();
-    // Mapa y lista deben salir de la misma búsqueda para que la persona no vea
-    // dos respuestas distintas según la vista elegida. Solo filtramos lugares
-    // con coordenadas inválidas porque el mapa necesita latitud/longitud
-    // utilizables para dibujar marcadores coherentes.
+    // Precalculamos esta lista una sola vez porque depende solo de los datos de
+    // entrada y no del estado interactivo del mapa.
     _placesWithCoordinates = widget.results
         .where(_hasValidCoordinates)
         .toList(growable: false);
@@ -79,10 +80,12 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                 Expanded(child: _buildNoCoordinatesState(theme))
               else ...[
                 if (_placesWithCoordinates.length != widget.results.length) ...[
+                  // Avisamos la diferencia para que en la defensa quede claro que
+                  // lista y mapa no siempre muestran exactamente lo mismo.
                   MinimalCard(
                     child: Text(
-                      'Mostramos ${_placesWithCoordinates.length} marcadores. '
-                      '${widget.results.length - _placesWithCoordinates.length} resultado(s) quedaron solo en la lista porque no traían coordenadas válidas.',
+                      'Mostramos ${_placesWithCoordinates.length} marcador(es). '
+                      '${widget.results.length - _placesWithCoordinates.length} resultado(s) no aparecen en el mapa.',
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -91,11 +94,11 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                 Expanded(
                   child: Column(
                     children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: FlutterMap(
-                            options: MapOptions(
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: FlutterMap(
+                             options: MapOptions(
                               initialCenter: _selectedPlace == null
                                   ? const LatLng(-17.7833, -63.1821)
                                   : _toLatLng(_selectedPlace!),
@@ -111,9 +114,11 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                                       padding: const EdgeInsets.all(56),
                                     )
                                   : null,
-                              onTap: (_, point) => setState(() {
-                                _selectedPlace = null;
-                              }),
+                               onTap: (_, point) => setState(() {
+                                 // Tocar el fondo limpia la selección actual y
+                                 // deja visible el estado neutro del panel.
+                                 _selectedPlace = null;
+                               }),
                             ),
                             children: [
                               TileLayer(
@@ -132,6 +137,8 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                                         child: GestureDetector(
                                           onTap: () {
                                             setState(() {
+                                              // El marcador solo cambia la tarjeta
+                                              // inferior; no hace navegación aún.
                                               _selectedPlace = place;
                                             });
                                           },
@@ -149,9 +156,13 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _SelectedPlaceCard(
-                        place: _selectedPlace,
-                        filters: widget.filters,
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: _SelectedPlaceCard(
+                            place: _selectedPlace,
+                            filters: widget.filters,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -171,14 +182,14 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
 
   String _buildSummaryMessage() {
     if (widget.results.isEmpty) {
-      return 'No hay resultados para proyectar en el mapa todavía.';
+      return 'No hay resultados para mostrar en el mapa.';
     }
 
     if (_placesWithCoordinates.isEmpty) {
-      return 'La búsqueda sí devolvió lugares, pero ninguno incluyó coordenadas útiles para ubicarlo en el mapa.';
+      return 'No encontramos ubicaciones disponibles.';
     }
 
-    return 'La lista y el mapa salen del mismo conjunto de resultados. Toca un marcador para ver qué lugar representa.';
+    return 'Toca un marcador para ver el lugar.';
   }
 
   Widget _buildEmptyState(ThemeData theme) {
@@ -191,7 +202,7 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
             Text('Sin resultados', style: theme.textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
-              'Cuando la búsqueda devuelva alojamientos, esta vista reutilizará esos mismos datos para pintar los marcadores.',
+              'Cuando haya resultados, aparecerán aquí.',
               style: theme.textTheme.bodyLarge,
             ),
           ],
@@ -213,7 +224,7 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'La lista sigue siendo útil, pero el mapa necesita latitud y longitud reales para cada lugar.',
+              'Estos resultados no tienen ubicación disponible.',
               style: theme.textTheme.bodyLarge,
             ),
             const SizedBox(height: 16),
@@ -230,6 +241,8 @@ class _MapResultsScreenState extends State<MapResultsScreen> {
   }
 
   bool _hasValidCoordinates(PlaceModel place) {
+    // Filtramos coordenadas fuera de rango y el caso 0,0 porque suele indicar
+    // dato faltante más que una ubicación real del alojamiento.
     final latitude = place.latitude;
     final longitude = place.longitude;
 
@@ -286,9 +299,9 @@ class _SelectedPlaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     if (place == null) {
+      final theme = Theme.of(context);
+
       return MinimalCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,7 +309,7 @@ class _SelectedPlaceCard extends StatelessWidget {
             Text('Marcador no seleccionado', style: theme.textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
-              'Toca cualquier marcador para sincronizar visualmente mapa y resultado seleccionado.',
+              'Toca un marcador para ver más información.',
               style: theme.textTheme.bodyMedium,
             ),
           ],
@@ -304,68 +317,30 @@ class _SelectedPlaceCard extends StatelessWidget {
       );
     }
 
-    return MinimalCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(place!.name, style: theme.textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text(place!.city, style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 12),
-          Text(
-            place!.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _InfoTag(label: place!.capacityLabel),
-              _InfoTag(label: '${place!.beds} camas'),
-              _InfoTag(label: place!.priceLabel),
-            ],
-          ),
-          if (filters != null) ...[
-            const SizedBox(height: 16),
-            PrimaryButton(
-              label: 'Ver detalle del lugar',
-              icon: Icons.arrow_forward_outlined,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PlaceDetailScreen(
-                      placePreview: place!,
-                      filters: filters!,
-                    ),
+    return Column(
+      children: [
+        PlaceCard(place: place!),
+        if (filters != null) ...[
+          const SizedBox(height: 16),
+          PrimaryButton(
+            label: 'Ver detalle del lugar',
+            icon: Icons.arrow_forward_outlined,
+            // Solo navegamos al detalle cuando existen filtros, porque ese dato
+            // es el que habilita la continuación hacia la reserva.
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlaceDetailScreen(
+                    placePreview: place!,
+                    filters: filters!,
                   ),
-                );
-              },
-            ),
-          ],
+                ),
+              );
+            },
+          ),
         ],
-      ),
-    );
-  }
-}
-
-class _InfoTag extends StatelessWidget {
-  const _InfoTag({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F3F3),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+      ],
     );
   }
 }
