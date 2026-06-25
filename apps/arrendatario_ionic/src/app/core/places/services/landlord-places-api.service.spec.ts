@@ -87,6 +87,27 @@ describe('LandlordPlacesApiService', () => {
   });
 
   it('usa el guardado con id en body para actualizar y mantiene la subida de fotos nuevas', async () => {
+    apiClient.getFromCandidates.and.resolveTo({
+      baseUrl: 'https://airbnbmob2.site',
+      path: '/api/lugares/7',
+      body: {
+        id: 7,
+        nombre: draft.name,
+        descripcion: draft.description,
+        cantPersonas: draft.guests,
+        cantCamas: draft.beds,
+        cantBanios: draft.bathrooms,
+        cantHabitaciones: draft.rooms,
+        tieneWifi: 1,
+        cantVehiculosParqueo: draft.parkingSlots,
+        precioNoche: '320.00',
+        costoLimpieza: '40.00',
+        ciudad: draft.city,
+        latitud: `${draft.latitude}`,
+        longitud: `${draft.longitude}`,
+        fotos: ['/storage/fotos/lago-1.jpg'],
+      },
+    });
     apiClient.postToCandidates.and.resolveTo({
       baseUrl: 'https://airbnbmob2.site',
       path: '/api/lugar',
@@ -129,7 +150,13 @@ describe('LandlordPlacesApiService', () => {
     );
     expect(apiClient.postFormDataToCandidates).toHaveBeenCalledWith(
       jasmine.objectContaining({
-        paths: ['/api/lugar/7/foto', '/api/lugares/7/foto'],
+        paths: ['/api/lugar/7/foto'],
+        token: 'token',
+      }),
+    );
+    expect(apiClient.getFromCandidates).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        paths: ['/api/lugares/7', '/api/lugar/7'],
         token: 'token',
       }),
     );

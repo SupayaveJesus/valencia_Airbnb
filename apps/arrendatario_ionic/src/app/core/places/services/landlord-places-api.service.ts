@@ -82,6 +82,16 @@ export class LandlordPlacesApiService {
     try {
       // La API actual crea primero el lugar y después acepta las fotos una por una.
       uploadedPhotos = await this.uploadPlacePhotos(session, place.id, draft.photos);
+
+      // Si el backend guarda la foto en una segunda operación, volvemos a leer el lugar
+      // para devolver a la UI el estado final, no el payload viejo del alta.
+      const refreshedPlace = await this.getPlaceById(session, place.id);
+
+      return {
+        place: refreshedPlace,
+        uploadedPhotos,
+        warningMessage,
+      };
     } catch (error) {
       warningMessage =
         error instanceof Error
@@ -123,6 +133,14 @@ export class LandlordPlacesApiService {
 
     try {
       uploadedPhotos = await this.uploadPlacePhotos(session, placeId, draft.photos);
+
+      const refreshedPlace = await this.getPlaceById(session, placeId);
+
+      return {
+        place: refreshedPlace,
+        uploadedPhotos,
+        warningMessage,
+      };
     } catch (error) {
       warningMessage =
         error instanceof Error
@@ -152,7 +170,7 @@ export class LandlordPlacesApiService {
       body.append('foto', file, file.name);
 
       await this.apiClient.postFormDataToCandidates<unknown>({
-        paths: [`/api/lugar/${placeId}/foto`, `/api/lugares/${placeId}/foto`],
+        paths: [`/api/lugar/${placeId}/foto`],
         body,
         token: session.token,
       });
